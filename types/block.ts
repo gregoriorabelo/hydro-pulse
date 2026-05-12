@@ -1,6 +1,17 @@
-export type WaterStatus = "Normal" | "Atenção" | "Crítico" | "Sem sinal";
+export type WaterStatus =
+  | "Normal"
+  | "Atenção"
+  | "Crítico"
+  | "Sem sinal"
+  | "Reabastecendo";
 
-export type WaterTrend = "Subindo" | "Caindo" | "Estável";
+export type WaterTrend =
+  | "Subindo"
+  | "Caindo"
+  | "Estável"
+  | "Queda crítica"
+  | "Consumo elevado"
+  | "Recuperação";
 
 export interface WaterHistoryPoint {
   hora: string;
@@ -12,6 +23,7 @@ export interface WaterBlock {
   id: string;
   nivel: number;
   profundidade: number;
+  status: WaterStatus;
   tendencia: WaterTrend;
   autonomia: string;
   atualizacao: string;
