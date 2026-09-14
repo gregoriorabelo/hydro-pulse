@@ -1,8 +1,43 @@
+import { timingSafeEqual } from "node:crypto";
 import { NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
 
+function isAuthorized(request: Request) {
+  const expectedKey = process.env.SENSOR_API_KEY;
+
+  if (!expectedKey) {
+    return false;
+  }
+
+  const providedKey = request.headers.get("x-api-key");
+
+  if (!providedKey) {
+    return false;
+  }
+
+  const expected = Buffer.from(expectedKey);
+  const provided = Buffer.from(providedKey);
+
+  if (expected.length !== provided.length) {
+    return false;
+  }
+
+  return timingSafeEqual(expected, provided);
+}
+
 export async function POST(request: Request) {
   try {
+    if (!isAuthorized(request)) {
+      return NextResponse.json(
+        {
+          error: "Não autorizado",
+        },
+        {
+          status: 401,
+        }
+      );
+    }
+
     const body = await request.json();
 
     const {
