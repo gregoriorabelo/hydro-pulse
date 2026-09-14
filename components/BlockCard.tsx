@@ -26,6 +26,7 @@ function getStatusStyle(status: WaterStatus) {
     Atenção: "border-yellow-500/20 bg-yellow-500/10 text-yellow-300",
     Crítico: "border-red-500/20 bg-red-500/10 text-red-300",
     "Sem sinal": "border-slate-500/20 bg-slate-500/10 text-slate-300",
+    Reabastecendo: "border-sky-500/20 bg-sky-500/10 text-sky-300",
   };
 
   return styles[status];

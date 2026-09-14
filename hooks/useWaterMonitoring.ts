@@ -8,21 +8,26 @@ export function useWaterMonitoring() {
   const [blocks, setBlocks] = useState<WaterBlock[]>([]);
   const [loading, setLoading] = useState(true);
 
-  async function loadBlocks() {
-    const data = await getBlocks();
-
-    setBlocks(data);
-    setLoading(false);
-  }
-
   useEffect(() => {
+    let ignore = false;
+
+    function loadBlocks() {
+      getBlocks().then((data) => {
+        if (ignore) return;
+
+        setBlocks(data);
+        setLoading(false);
+      });
+    }
+
     loadBlocks();
 
-    const interval = setInterval(() => {
-      loadBlocks();
-    }, 5000);
+    const interval = setInterval(loadBlocks, 5000);
 
-    return () => clearInterval(interval);
+    return () => {
+      ignore = true;
+      clearInterval(interval);
+    };
   }, []);
 
   return {

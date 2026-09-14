@@ -2,9 +2,11 @@ import type { WaterBlock } from "@/types/block";
 
 export const mockBlocks: WaterBlock[] = [
   {
+    databaseId: "mock-a",
     id: "A",
     nivel: 82,
     profundidade: 164,
+    status: "Normal",
     tendencia: "Estável",
     autonomia: "28h",
     atualizacao: "Agora",
@@ -13,9 +15,11 @@ export const mockBlocks: WaterBlock[] = [
   },
 
   {
+    databaseId: "mock-b",
     id: "B",
     nivel: 48,
     profundidade: 96,
+    status: "Atenção",
     tendencia: "Caindo",
     autonomia: "11h",
     atualizacao: "2 min",
@@ -24,9 +28,11 @@ export const mockBlocks: WaterBlock[] = [
   },
 
   {
+    databaseId: "mock-c",
     id: "C",
     nivel: 31,
     profundidade: 62,
+    status: "Crítico",
     tendencia: "Caindo",
     autonomia: "4h",
     atualizacao: "1 min",
@@ -35,9 +41,11 @@ export const mockBlocks: WaterBlock[] = [
   },
 
   {
+    databaseId: "mock-d",
     id: "D",
     nivel: 74,
     profundidade: 148,
+    status: "Normal",
     tendencia: "Subindo",
     autonomia: "25h",
     atualizacao: "Agora",
@@ -46,9 +54,11 @@ export const mockBlocks: WaterBlock[] = [
   },
 
   {
+    databaseId: "mock-e",
     id: "E",
     nivel: 63,
     profundidade: 126,
+    status: "Atenção",
     tendencia: "Estável",
     autonomia: "18h",
     atualizacao: "5 min",
@@ -57,9 +67,11 @@ export const mockBlocks: WaterBlock[] = [
   },
 
   {
+    databaseId: "mock-f",
     id: "F",
     nivel: 88,
     profundidade: 176,
+    status: "Normal",
     tendencia: "Estável",
     autonomia: "32h",
     atualizacao: "Agora",
