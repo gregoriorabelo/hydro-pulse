@@ -1,8 +1,8 @@
 "use client";
 
 import React from "react";
+import { useRouter } from "next/navigation";
 import AppShell from "@/components/AppShell";
-import MetricCard from "@/components/MetricCard";
 import BlockCard from "@/components/BlockCard";
 import OperationalInsights from "@/components/OperationalInsights";
 import OperationalOverview from "@/components/OperationalOverview";
@@ -11,46 +11,69 @@ import { useWaterMonitoring } from "@/hooks/useWaterMonitoring";
 import { supabase } from "@/lib/supabase";
 
 function getAverageLevel(levels: number[]) {
-  if (levels.length === 0) {
-    return 0;
-  }
+  if (levels.length === 0) return 0;
 
   const total = levels.reduce((sum, value) => sum + value, 0);
-
   return Math.round(total / levels.length);
 }
 
 export default function Home() {
+  const router = useRouter();
   const { blocks } = useWaterMonitoring();
+  const [checkingSession, setCheckingSession] = React.useState(true);
 
   React.useEffect(() => {
-    async function testSupabaseConnection() {
-      const { data, error } = await supabase
-        .from("condominiums")
-        .select("*");
+    let ignore = false;
 
-      console.log("Supabase data:", data);
-      console.log("Supabase error:", error);
+    async function requireSession() {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (ignore) return;
+
+      if (!user) {
+        router.replace("/login");
+        return;
+      }
+
+      setCheckingSession(false);
     }
 
-    testSupabaseConnection();
-  }, []);
+    requireSession();
 
-  const averageLevel = getAverageLevel(
-    blocks.map((block) => block.nivel)
-  );
+    return () => {
+      ignore = true;
+    };
+  }, [router]);
+
+  const averageLevel = getAverageLevel(blocks.map((block) => block.nivel));
+  const activeAlerts = blocks.filter((block) => block.status !== "Normal").length;
+
+  if (checkingSession) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#07111F] text-slate-400">
+        Verificando sessão...
+      </div>
+    );
+  }
 
   return (
     <AppShell>
       <main className="space-y-8">
-        <section className="rounded-[2rem] border border-white/10 bg-white/[0.03] p-8">
-          <div className="flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
-            <div className="max-w-3xl">
-              <div className="mb-4 inline-flex items-center rounded-full border border-[#D5B56B]/20 bg-[#D5B56B]/10 px-5 py-2 text-sm font-medium text-[#F4D58D]">
+        <section className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-[#06162A] p-10 shadow-2xl shadow-black/30">
+          <div className="pointer-events-none absolute inset-0 opacity-40">
+            <div className="absolute bottom-0 left-0 h-40 w-full bg-[radial-gradient(circle_at_bottom_left,rgba(37,99,235,0.35),transparent_45%)]" />
+            <div className="absolute bottom-0 right-0 h-40 w-full bg-[radial-gradient(circle_at_bottom_right,rgba(14,165,233,0.18),transparent_45%)]" />
+          </div>
+
+          <div className="relative grid gap-8 lg:grid-cols-[1.4fr_0.8fr] lg:items-center">
+            <div>
+              <div className="mb-7 inline-flex rounded-2xl border border-[#D5B56B]/40 bg-[#D5B56B]/10 px-5 py-2 text-sm font-semibold text-[#F4C542]">
                 Plataforma Magnacon Gestão Condominial
               </div>
 
-              <h1 className="text-5xl font-black tracking-tight text-white lg:text-7xl">
+              <h1 className="text-5xl font-black tracking-tight text-white lg:text-6xl">
                 Magnacon Smart Water
               </h1>
 
@@ -60,54 +83,59 @@ export default function Home() {
               </p>
             </div>
 
-            <div className="rounded-[2rem] border border-[#1E3A5F] bg-[#021126] p-8">
-              <p className="text-lg text-slate-400">
-                Ambiente monitorado
-              </p>
+            <div className="rounded-[2rem] border border-white/10 bg-[#041225]/80 p-8 shadow-xl">
+              <p className="text-xl text-slate-400">Ambiente monitorado</p>
 
-              <h2 className="mt-4 text-5xl font-black text-white">
+              <h2 className="mt-6 text-4xl font-black text-white">
                 Condomínio Modelo
               </h2>
 
-              <p className="mt-6 text-lg text-sky-100">
-                Dados simulados em tempo real
+              <p className="mt-6 flex items-center gap-2 text-lg text-sky-100">
+                Dados conectados ao Supabase
+                <span className="text-emerald-400">✓</span>
               </p>
             </div>
           </div>
         </section>
 
         <section className="grid gap-5 md:grid-cols-2 xl:grid-cols-5">
-          <MetricCard
-            titulo="Condomínios monitorados"
-            valor="1"
-          />
+          <div className="rounded-[1.7rem] border border-white/10 bg-[#07182D] p-6">
+            <p className="text-slate-300">Condomínios monitorados</p>
+            <h3 className="mt-4 text-5xl font-black">1</h3>
+          </div>
 
-          <MetricCard
-            titulo="Blocos monitorados"
-            valor={blocks.length}
-          />
+          <div className="rounded-[1.7rem] border border-white/10 bg-[#07182D] p-6">
+            <p className="text-slate-300">Blocos monitorados</p>
+            <h3 className="mt-4 text-5xl font-black">{blocks.length}</h3>
+          </div>
 
-          <MetricCard
-            titulo="Sensores online"
-            valor="5/6"
-          />
+          <div className="rounded-[1.7rem] border border-white/10 bg-[#07182D] p-6">
+            <p className="text-slate-300">Sensores online</p>
+            <h3 className="mt-4 text-5xl font-black">
+              {blocks.length}/<span className="text-emerald-400">{blocks.length}</span>
+            </h3>
+          </div>
 
-          <MetricCard
-            titulo="Alertas ativos"
-            valor="0"
-          />
+          <div className="rounded-[1.7rem] border border-white/10 bg-[#07182D] p-6">
+            <p className="text-slate-300">Alertas ativos</p>
+            <h3 className="mt-4 text-5xl font-black text-red-400">
+              {activeAlerts}
+            </h3>
+          </div>
 
-          <MetricCard
-            titulo="Nível médio geral"
-            valor={`${averageLevel}%`}
-          />
+          <div className="rounded-[1.7rem] border border-white/10 bg-[#07182D] p-6">
+            <p className="text-slate-300">Nível médio geral</p>
+            <h3 className="mt-4 text-5xl font-black text-blue-400">
+              {averageLevel}%
+            </h3>
+          </div>
         </section>
 
-        <OperationalOverview blocks={blocks} />
-
-        <AlertCenter blocks={blocks} />
-
-        <OperationalInsights blocks={blocks} />
+        <section className="grid gap-6 xl:grid-cols-3">
+          <OperationalOverview blocks={blocks} />
+          <AlertCenter blocks={blocks} />
+          <OperationalInsights blocks={blocks} />
+        </section>
 
         <section>
           <h2 className="text-5xl font-black text-white">
@@ -120,10 +148,7 @@ export default function Home() {
 
           <div className="mt-10 grid gap-6 lg:grid-cols-2">
             {blocks.map((block) => (
-              <BlockCard
-                key={block.id}
-                block={block}
-              />
+              <BlockCard key={block.databaseId} block={block} />
             ))}
           </div>
         </section>

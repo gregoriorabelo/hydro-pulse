@@ -1,8 +1,17 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabase";
 
 export default function AppShell({ children }: { children: ReactNode }) {
+  const router = useRouter();
+
+  async function handleLogout() {
+    await supabase.auth.signOut();
+    router.replace("/login");
+  }
+
   return (
     <div className="min-h-screen bg-[#07111F] text-white lg:flex">
       <aside className="hidden w-72 shrink-0 border-r border-white/10 bg-[#0B1627] p-6 lg:block">
@@ -54,6 +63,14 @@ export default function AppShell({ children }: { children: ReactNode }) {
             Estrutura preparada para condomínios, blocos, sensores e alertas.
           </p>
         </div>
+
+        <button
+          type="button"
+          onClick={handleLogout}
+          className="mt-6 w-full rounded-2xl border border-white/10 px-4 py-3 text-left text-sm text-slate-300 transition hover:bg-white/10 hover:text-white"
+        >
+          Sair
+        </button>
       </aside>
 
       <div className="min-w-0 flex-1 p-6 lg:p-10">
