@@ -74,7 +74,7 @@ export default function Home() {
               </div>
 
               <h1 className="text-5xl font-black tracking-tight text-white lg:text-6xl">
-                Magnacon Smart Water
+                Hydro Pulse
               </h1>
 
               <p className="mt-6 max-w-2xl text-xl leading-9 text-slate-300">

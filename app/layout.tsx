@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Magnacon Smart Water",
+  title: "Hydro Pulse",
   description:
     "Monitoramento hídrico inteligente para condomínios com visão operacional, alertas preventivos e inteligência gerencial.",
 };

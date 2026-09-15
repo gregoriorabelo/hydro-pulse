@@ -74,7 +74,7 @@ export default function LoginPage() {
           </p>
 
           <h1 className="mt-3 text-3xl font-black text-white">
-            Smart Water
+            Hydro Pulse
           </h1>
 
           <p className="mt-3 text-slate-400">
