@@ -2,14 +2,14 @@
 
 import type { ReactNode } from "react";
 import { useRouter } from "next/navigation";
-import { supabase } from "@/lib/supabase";
 
 export default function AppShell({ children }: { children: ReactNode }) {
   const router = useRouter();
 
   async function handleLogout() {
-    await supabase.auth.signOut();
+    await fetch("/api/auth/logout", { method: "POST" });
     router.replace("/login");
+    router.refresh();
   }
 
   return (

@@ -1,6 +1,10 @@
 import { timingSafeEqual } from "node:crypto";
 import { NextResponse } from "next/server";
-import { supabase } from "@/lib/supabase";
+import { sql } from "@/lib/db";
+
+type BlockRow = {
+  id: string;
+};
 
 function isAuthorized(request: Request) {
   const expectedKey = process.env.SENSOR_API_KEY;
@@ -57,11 +61,11 @@ export async function POST(request: Request) {
       );
     }
 
-    const { data: block } = await supabase
-      .from("blocks")
-      .select("id")
-      .eq("sensor_identifier", sensor_id)
-      .single();
+    const blockRows = (await sql`
+      select id from blocks where sensor_identifier = ${sensor_id}
+    `) as BlockRow[];
+
+    const block = blockRows[0];
 
     if (!block) {
       return NextResponse.json(
@@ -74,26 +78,10 @@ export async function POST(request: Request) {
       );
     }
 
-    const { error } = await supabase
-      .from("readings")
-      .insert({
-        block_id: block.id,
-        water_level,
-        depth_cm,
-      });
-
-    if (error) {
-      console.error(error);
-
-      return NextResponse.json(
-        {
-          error: "Erro ao salvar leitura",
-        },
-        {
-          status: 500,
-        }
-      );
-    }
+    await sql`
+      insert into readings (block_id, water_level, depth_cm)
+      values (${block.id}, ${water_level}, ${depth_cm ?? null})
+    `;
 
     return NextResponse.json({
       success: true,

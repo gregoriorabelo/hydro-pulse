@@ -1,14 +1,11 @@
 "use client";
 
-import React from "react";
-import { useRouter } from "next/navigation";
 import AppShell from "@/components/AppShell";
 import BlockCard from "@/components/BlockCard";
 import OperationalInsights from "@/components/OperationalInsights";
 import OperationalOverview from "@/components/OperationalOverview";
 import AlertCenter from "@/components/AlertCenter";
 import { useWaterMonitoring } from "@/hooks/useWaterMonitoring";
-import { supabase } from "@/lib/supabase";
 
 function getAverageLevel(levels: number[]) {
   if (levels.length === 0) return 0;
@@ -18,45 +15,10 @@ function getAverageLevel(levels: number[]) {
 }
 
 export default function Home() {
-  const router = useRouter();
   const { blocks } = useWaterMonitoring();
-  const [checkingSession, setCheckingSession] = React.useState(true);
-
-  React.useEffect(() => {
-    let ignore = false;
-
-    async function requireSession() {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
-      if (ignore) return;
-
-      if (!user) {
-        router.replace("/login");
-        return;
-      }
-
-      setCheckingSession(false);
-    }
-
-    requireSession();
-
-    return () => {
-      ignore = true;
-    };
-  }, [router]);
 
   const averageLevel = getAverageLevel(blocks.map((block) => block.nivel));
   const activeAlerts = blocks.filter((block) => block.status !== "Normal").length;
-
-  if (checkingSession) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-[#07111F] text-slate-400">
-        Verificando sessão...
-      </div>
-    );
-  }
 
   return (
     <AppShell>
@@ -91,7 +53,7 @@ export default function Home() {
               </h2>
 
               <p className="mt-6 flex items-center gap-2 text-lg text-sky-100">
-                Dados conectados ao Supabase
+                Dados conectados ao banco de dados
                 <span className="text-emerald-400">✓</span>
               </p>
             </div>

@@ -1,24 +1,19 @@
-import { supabase } from "@/lib/supabase";
+import { sql } from "@/lib/db";
 import type { WaterBlock } from "@/types/block";
 
-type SupabaseReading = {
-  water_level: number;
-  depth_cm: number;
-  recorded_at: string;
-};
-
-type SupabaseBlock = {
-  id: string;
-  name: string;
-  sensor_identifier: string | null;
-  readings: SupabaseReading[];
+type BlockReadingRow = {
+  block_id: string;
+  block_name: string;
+  water_level: string | null;
+  depth_cm: string | null;
+  recorded_at: string | null;
 };
 
 function getVisualBlockName(name: string) {
   return name.replace("Bloco ", "").trim();
 }
 
-function formatTime(value?: string) {
+function formatTime(value?: string | null) {
   if (!value) {
     return "Sem atualização";
   }
@@ -30,40 +25,50 @@ function formatTime(value?: string) {
 }
 
 export async function getBlocks(): Promise<WaterBlock[]> {
-  const { data, error } = await supabase
-    .from("blocks")
-    .select(`
-      id,
-      name,
-      sensor_identifier,
-      readings (
-        water_level,
-        depth_cm,
-        recorded_at
-      )
-    `)
-    .order("name", { ascending: true })
-    .order("recorded_at", {
-      referencedTable: "readings",
-      ascending: false,
-    })
-    .limit(12, {
-      referencedTable: "readings",
-    });
+  const rows = (await sql`
+    select
+      b.id as block_id,
+      b.name as block_name,
+      r.water_level,
+      r.depth_cm,
+      r.recorded_at
+    from blocks b
+    left join lateral (
+      select water_level, depth_cm, recorded_at
+      from readings
+      where readings.block_id = b.id
+      order by recorded_at desc
+      limit 12
+    ) r on true
+    order by b.name asc, r.recorded_at desc nulls last
+  `) as BlockReadingRow[];
 
-  if (error) {
-    console.error("Erro ao buscar blocos:", error);
-    return [];
+  const blocksById = new Map<
+    string,
+    { name: string; readings: BlockReadingRow[] }
+  >();
+
+  for (const row of rows) {
+    const entry = blocksById.get(row.block_id) ?? {
+      name: row.block_name,
+      readings: [],
+    };
+
+    if (row.recorded_at) {
+      entry.readings.push(row);
+    }
+
+    blocksById.set(row.block_id, entry);
   }
 
-  return (data as SupabaseBlock[]).map((block) => {
-    const lastReading = block.readings?.[0];
+  return Array.from(blocksById.entries()).map(([blockId, block]) => {
+    const lastReading = block.readings[0];
 
     const nivel = Number(lastReading?.water_level ?? 0);
     const profundidade = Number(lastReading?.depth_cm ?? 0);
 
     return {
-      databaseId: block.id,
+      databaseId: blockId,
       id: getVisualBlockName(block.name),
       nivel,
       profundidade,
@@ -72,9 +77,9 @@ export async function getBlocks(): Promise<WaterBlock[]> {
       autonomia: nivel > 0 ? `${Math.floor(nivel / 3)}h` : "Sem leitura",
       atualizacao: formatTime(lastReading?.recorded_at),
       alerta: lastReading
-        ? "Leitura real conectada ao Supabase"
+        ? "Leitura real conectada ao banco de dados"
         : "Nenhuma leitura recebida do sensor.",
-      historico: (block.readings || [])
+      historico: block.readings
         .slice()
         .reverse()
         .map((reading) => ({
@@ -90,13 +95,8 @@ export async function saveReading(
   waterLevel: number,
   depthCm: number
 ) {
-  const { error } = await supabase.from("readings").insert({
-    block_id: blockDatabaseId,
-    water_level: waterLevel,
-    depth_cm: depthCm,
-  });
-
-  if (error) {
-    console.error("Erro ao salvar leitura:", error);
-  }
+  await sql`
+    insert into readings (block_id, water_level, depth_cm)
+    values (${blockDatabaseId}, ${waterLevel}, ${depthCm})
+  `;
 }
