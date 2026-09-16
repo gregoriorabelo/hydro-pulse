@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { sql } from "@/lib/db";
 import { createResetToken } from "@/lib/passwordReset";
 import { sendEmail } from "@/lib/email";
+import { getResetLockStatus, recordResetRequest } from "@/lib/passwordResetAttempts";
 
 type UserRow = { id: string; email: string; name: string | null };
 
@@ -12,6 +13,19 @@ export async function POST(request: Request) {
     if (!email) {
       return NextResponse.json({ error: "Informe o e-mail." }, { status: 400 });
     }
+
+    const lockStatus = await getResetLockStatus(email);
+
+    if (lockStatus.locked) {
+      return NextResponse.json(
+        {
+          error: `Muitos pedidos de redefinição para este e-mail. Tente novamente em ${lockStatus.minutesRemaining} minuto(s).`,
+        },
+        { status: 429 }
+      );
+    }
+
+    await recordResetRequest(email);
 
     const rows = (await sql`
       select id, email, name from users where email = ${email}

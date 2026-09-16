@@ -1,28 +1,15 @@
 import { timingSafeEqual } from "node:crypto";
 import { NextResponse } from "next/server";
 import { sql } from "@/lib/db";
+import { getSensorAuth } from "@/services/sensorService";
 import { notifyIfEnteredCritical } from "@/services/notificationService";
-
-type SensorRow = {
-  reservoir_id: string | null;
-};
 
 type LastReadingRow = {
   water_level: string;
 };
 
-function isAuthorized(request: Request) {
-  const expectedKey = process.env.SENSOR_API_KEY;
-
-  if (!expectedKey) {
-    console.warn("[readings] SENSOR_API_KEY não está configurada no ambiente.");
-    return false;
-  }
-
-  const providedKey = request.headers.get("x-api-key");
-
+function keysMatch(expectedKey: string, providedKey: string | null): boolean {
   if (!providedKey) {
-    console.warn("[readings] Requisição sem header x-api-key.");
     return false;
   }
 
@@ -30,41 +17,17 @@ function isAuthorized(request: Request) {
   const provided = Buffer.from(providedKey);
 
   if (expected.length !== provided.length) {
-    console.warn(
-      `[readings] Tamanho da chave não bate. Esperado: ${expected.length} caracteres. Recebido: ${provided.length} caracteres.`
-    );
     return false;
   }
 
-  const matches = timingSafeEqual(expected, provided);
-
-  if (!matches) {
-    console.warn("[readings] Chave recebida tem o mesmo tamanho da esperada, mas o conteúdo é diferente.");
-  }
-
-  return matches;
+  return timingSafeEqual(expected, provided);
 }
 
 export async function POST(request: Request) {
   try {
-    if (!isAuthorized(request)) {
-      return NextResponse.json(
-        {
-          error: "Não autorizado",
-        },
-        {
-          status: 401,
-        }
-      );
-    }
-
     const body = await request.json();
 
-    const {
-      sensor_id,
-      water_level,
-      depth_cm,
-    } = body;
+    const { sensor_id, water_level, depth_cm } = body;
 
     if (!sensor_id || water_level === undefined) {
       return NextResponse.json(
@@ -77,24 +40,26 @@ export async function POST(request: Request) {
       );
     }
 
-    const sensorRows = (await sql`
-      select reservoir_id from sensors where serial = ${sensor_id}
-    `) as SensorRow[];
+    const providedKey = request.headers.get("x-api-key");
+    const sensorAuth = await getSensorAuth(sensor_id);
 
-    const sensor = sensorRows[0];
+    // Mensagem e status idênticos tanto pra sensor inexistente quanto pra
+    // chave errada, pra não deixar alguém descobrir números de série
+    // válidos só testando chaves aleatórias.
+    if (!sensorAuth || !keysMatch(sensorAuth.secret, providedKey)) {
+      console.warn(`[readings] Autenticação recusada para o sensor "${sensor_id}".`);
 
-    if (!sensor) {
       return NextResponse.json(
         {
-          error: "Sensor não encontrado",
+          error: "Não autorizado",
         },
         {
-          status: 404,
+          status: 401,
         }
       );
     }
 
-    if (!sensor.reservoir_id) {
+    if (!sensorAuth.reservoirId) {
       return NextResponse.json(
         {
           error: "Sensor não está vinculado a um reservatório",
@@ -107,7 +72,7 @@ export async function POST(request: Request) {
 
     const previousReadingRows = (await sql`
       select water_level from readings
-      where reservoir_id = ${sensor.reservoir_id}
+      where reservoir_id = ${sensorAuth.reservoirId}
       order by recorded_at desc
       limit 1
     `) as LastReadingRow[];
@@ -118,10 +83,10 @@ export async function POST(request: Request) {
 
     await sql`
       insert into readings (reservoir_id, water_level, depth_cm)
-      values (${sensor.reservoir_id}, ${water_level}, ${depth_cm ?? null})
+      values (${sensorAuth.reservoirId}, ${water_level}, ${depth_cm ?? null})
     `;
 
-    await notifyIfEnteredCritical(sensor.reservoir_id, Number(water_level), previousLevel);
+    await notifyIfEnteredCritical(sensorAuth.reservoirId, Number(water_level), previousLevel);
 
     return NextResponse.json({
       success: true,

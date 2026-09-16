@@ -40,9 +40,12 @@
    Hydro Pulse normalmente (pela interface web).
 2. Anote:
    - O **número de série** do sensor (tela Sensores).
+   - A **chave do sensor**, mostrada uma única vez logo depois de cadastrar
+     (ou em "Gerar nova chave", no menu do sensor, se precisar ver de novo —
+     isso invalida a chave anterior). Cada sensor tem a sua própria chave,
+     não existe mais uma chave única compartilhada pelo projeto.
    - A **Profundidade total** e a **Altura útil** que você cadastrou no
      reservatório (tela Reservatórios).
-   - A sua `SENSOR_API_KEY` (a mesma configurada na Vercel).
 3. Abra `esp32_rcwl1655.ino` no Arduino IDE.
 4. Preencha as constantes no topo do arquivo:
    - `WIFI_SSID` / `WIFI_PASSWORD`
@@ -64,7 +67,7 @@ leitura direto pelo terminal:
 ```bash
 curl -X POST https://SEU-APP.vercel.app/api/readings \
   -H "Content-Type: application/json" \
-  -H "x-api-key: SUA_SENSOR_API_KEY" \
+  -H "x-api-key: CHAVE_DESSE_SENSOR" \
   -d '{"sensor_id":"SN-XXXXXXXX","water_level":75,"depth_cm":150}'
 ```
 

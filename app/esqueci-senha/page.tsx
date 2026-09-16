@@ -7,18 +7,27 @@ export default function EsqueciSenhaPage() {
   const [email, setEmail] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [sent, setSent] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
     setSubmitting(true);
+    setError(null);
 
-    await fetch("/api/auth/forgot-password", {
+    const response = await fetch("/api/auth/forgot-password", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email }),
     });
 
     setSubmitting(false);
+
+    if (!response.ok) {
+      const data = await response.json().catch(() => null);
+      setError(data?.error ?? "Não foi possível enviar o link.");
+      return;
+    }
+
     setSent(true);
   }
 
@@ -66,6 +75,12 @@ export default function EsqueciSenhaPage() {
                 className="w-full rounded-2xl border border-white/10 bg-brand-petrol px-4 py-3 text-white outline-none focus:border-brand-cyan/50"
               />
             </div>
+
+            {error && (
+              <p className="rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+                {error}
+              </p>
+            )}
 
             <button
               type="submit"

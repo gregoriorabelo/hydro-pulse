@@ -33,6 +33,9 @@ export default function SensoresPage() {
   const [model, setModel] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [revealedSecret, setRevealedSecret] = useState<{ serial: string; secret: string } | null>(
+    null
+  );
 
   function loadData() {
     if (!activeCondominiumId) return;
@@ -121,8 +124,14 @@ export default function SensoresPage() {
       return;
     }
 
+    const data = (await response.json()) as { sensor: Sensor };
+
     setModalOpen(false);
     loadData();
+
+    if (!editing && data.sensor.secret) {
+      setRevealedSecret({ serial: data.sensor.serial, secret: data.sensor.secret });
+    }
   }
 
   async function handleDelete(sensor: SensorRow) {
@@ -132,6 +141,24 @@ export default function SensoresPage() {
 
     await fetch(`/api/sensors/${sensor.id}`, { method: "DELETE" });
     loadData();
+  }
+
+  async function handleRegenerateSecret(sensor: SensorRow) {
+    const confirmed = window.confirm(
+      `Gerar uma nova chave para "${sensor.name}"? A chave atual vai parar de funcionar.`
+    );
+
+    if (!confirmed) return;
+
+    const response = await fetch(`/api/sensors/${sensor.id}/secret`, { method: "POST" });
+
+    if (!response.ok) {
+      window.alert("Não foi possível gerar uma nova chave.");
+      return;
+    }
+
+    const data = (await response.json()) as { secret: string };
+    setRevealedSecret({ serial: sensor.serial, secret: data.secret });
   }
 
   if (!loadingCondominiums && condominiums.length === 0) {
@@ -208,6 +235,10 @@ export default function SensoresPage() {
                         actions={[
                           { label: "Editar", onClick: () => openEdit(sensor) },
                           {
+                            label: "Gerar nova chave",
+                            onClick: () => handleRegenerateSecret(sensor),
+                          },
+                          {
                             label: "Excluir",
                             onClick: () => handleDelete(sensor),
                             danger: true,
@@ -274,8 +305,10 @@ export default function SensoresPage() {
               <p className="mt-2 text-xs text-slate-500">
                 É esse valor que o sensor deve enviar no campo{" "}
                 <code>sensor_id</code> do corpo da requisição a{" "}
-                <code>POST /api/readings</code> (junto com o header{" "}
-                <code>x-api-key</code>).
+                <code>POST /api/readings</code>. {!editing && (
+                  <>A chave de autenticação (header <code>x-api-key</code>)
+                  é gerada automaticamente e só aparece uma vez, logo depois de salvar.</>
+                )}
               </p>
             </div>
 
@@ -295,6 +328,38 @@ export default function SensoresPage() {
               {saving ? "Salvando..." : "Salvar"}
             </button>
           </form>
+        </Modal>
+      )}
+
+      {revealedSecret && (
+        <Modal title="Chave do sensor" onClose={() => setRevealedSecret(null)}>
+          <p className="text-sm text-slate-400">
+            Guarde essa chave agora — ela não vai aparecer de novo. Use no firmware do
+            sensor <span className="font-mono text-brand-cyan">{revealedSecret.serial}</span>,
+            no header <code>x-api-key</code>.
+          </p>
+
+          <div className="mt-4 flex items-center gap-2">
+            <code className="flex-1 overflow-x-auto rounded-2xl border border-white/10 bg-brand-deep px-4 py-3 text-sm text-white">
+              {revealedSecret.secret}
+            </code>
+
+            <button
+              type="button"
+              onClick={() => navigator.clipboard.writeText(revealedSecret.secret)}
+              className="shrink-0 rounded-2xl border border-white/10 px-4 py-3 text-sm text-slate-300 transition hover:bg-white/10"
+            >
+              Copiar
+            </button>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setRevealedSecret(null)}
+            className="mt-6 w-full rounded-2xl bg-brand-gold px-4 py-3 font-semibold text-brand-deep transition hover:bg-[#e0c15c]"
+          >
+            Já copiei
+          </button>
         </Modal>
       )}
     </>

@@ -54,6 +54,7 @@ create table if not exists sensors (
   name text not null,
   serial text unique not null,
   model text,
+  secret text not null default encode(gen_random_bytes(24), 'hex'),
   created_at timestamptz not null default now()
 );
 
@@ -68,6 +69,13 @@ create table if not exists user_condominiums (
 );
 
 create table if not exists login_attempts (
+  email text primary key,
+  attempts integer not null default 0,
+  locked_until timestamptz,
+  updated_at timestamptz not null default now()
+);
+
+create table if not exists password_reset_attempts (
   email text primary key,
   attempts integer not null default 0,
   locked_until timestamptz,

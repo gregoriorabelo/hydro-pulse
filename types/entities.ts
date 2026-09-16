@@ -72,6 +72,7 @@ export type Sensor = {
   serial: string;
   model: string | null;
   createdAt: string;
+  secret?: string;
 };
 
 export type SensorInput = {

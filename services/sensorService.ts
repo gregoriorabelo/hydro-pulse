@@ -27,7 +27,8 @@ export async function listSensorsByCondominium(
   condominiumId: string
 ): Promise<(Sensor & { blockName: string; reservoirName: string | null })[]> {
   const rows = (await sql`
-    select s.*, b.name as block_name, r.name as reservoir_name
+    select s.id, s.block_id, s.reservoir_id, s.name, s.serial, s.model, s.created_at,
+      b.name as block_name, r.name as reservoir_name
     from sensors s
     join blocks b on b.id = s.block_id
     left join reservoirs r on r.id = s.reservoir_id
@@ -46,10 +47,12 @@ export async function createSensor(data: SensorInput): Promise<Sensor> {
   const rows = (await sql`
     insert into sensors (block_id, reservoir_id, name, serial, model)
     values (${data.blockId}, ${data.reservoirId ?? null}, ${data.name}, ${data.serial}, ${data.model ?? null})
-    returning *
-  `) as Row[];
+    returning id, block_id, reservoir_id, name, serial, model, created_at, secret
+  `) as (Row & { secret: string })[];
 
-  return mapRow(rows[0]);
+  const row = rows[0];
+
+  return { ...mapRow(row), secret: row.secret };
 }
 
 export async function updateSensor(
@@ -64,7 +67,7 @@ export async function updateSensor(
       serial = ${data.serial},
       model = ${data.model ?? null}
     where id = ${id}
-    returning *
+    returning id, block_id, reservoir_id, name, serial, model, created_at
   `) as Row[];
 
   return rows[0] ? mapRow(rows[0]) : null;
@@ -72,4 +75,26 @@ export async function updateSensor(
 
 export async function deleteSensor(id: string): Promise<void> {
   await sql`delete from sensors where id = ${id}`;
+}
+
+export async function regenerateSensorSecret(id: string): Promise<string | null> {
+  const rows = (await sql`
+    update sensors set secret = encode(gen_random_bytes(24), 'hex')
+    where id = ${id}
+    returning secret
+  `) as { secret: string }[];
+
+  return rows[0]?.secret ?? null;
+}
+
+export async function getSensorAuth(
+  serial: string
+): Promise<{ reservoirId: string | null; secret: string } | null> {
+  const rows = (await sql`
+    select reservoir_id, secret from sensors where serial = ${serial}
+  `) as { reservoir_id: string | null; secret: string }[];
+
+  const row = rows[0];
+
+  return row ? { reservoirId: row.reservoir_id, secret: row.secret } : null;
 }

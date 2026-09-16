@@ -31,8 +31,10 @@ const char *WIFI_PASSWORD = "SENHA_DA_SUA_REDE";
 // URL do seu app na Vercel + o endpoint de leituras.
 const char *API_URL = "https://SEU-APP.vercel.app/api/readings";
 
-// Mesma chave configurada na variável de ambiente SENSOR_API_KEY do projeto.
-const char *SENSOR_API_KEY = "COLE_AQUI_A_SENSOR_API_KEY";
+// Chave própria deste sensor, mostrada uma única vez na tela "Sensores"
+// do Hydro Pulse logo depois de cadastrar o sensor (ou ao gerar uma nova
+// chave, se perder a anterior). Cada sensor tem a sua — não é compartilhada.
+const char *SENSOR_API_KEY = "COLE_AQUI_A_CHAVE_DESTE_SENSOR";
 
 // Número de série cadastrado na tela "Sensores" do Hydro Pulse
 // (o mesmo valor que aparece no campo "Número de série" lá).
