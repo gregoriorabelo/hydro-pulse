@@ -15,12 +15,14 @@ function isAuthorized(request: Request) {
   const expectedKey = process.env.SENSOR_API_KEY;
 
   if (!expectedKey) {
+    console.warn("[readings] SENSOR_API_KEY não está configurada no ambiente.");
     return false;
   }
 
   const providedKey = request.headers.get("x-api-key");
 
   if (!providedKey) {
+    console.warn("[readings] Requisição sem header x-api-key.");
     return false;
   }
 
@@ -28,10 +30,19 @@ function isAuthorized(request: Request) {
   const provided = Buffer.from(providedKey);
 
   if (expected.length !== provided.length) {
+    console.warn(
+      `[readings] Tamanho da chave não bate. Esperado: ${expected.length} caracteres. Recebido: ${provided.length} caracteres.`
+    );
     return false;
   }
 
-  return timingSafeEqual(expected, provided);
+  const matches = timingSafeEqual(expected, provided);
+
+  if (!matches) {
+    console.warn("[readings] Chave recebida tem o mesmo tamanho da esperada, mas o conteúdo é diferente.");
+  }
+
+  return matches;
 }
 
 export async function POST(request: Request) {
