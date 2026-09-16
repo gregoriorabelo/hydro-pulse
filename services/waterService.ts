@@ -1,17 +1,18 @@
 import { sql } from "@/lib/db";
-import type { WaterBlock } from "@/types/block";
+import type { WaterBlock, WaterStatus } from "@/types/block";
 
-type BlockReadingRow = {
-  block_id: string;
+type ReservoirReadingRow = {
+  reservoir_id: string;
+  reservoir_name: string;
+  reservoir_status: "ativo" | "pausado";
+  critical_level_percent: string;
+  attention_level_percent: string;
+  expected_autonomy_hours: string | null;
   block_name: string;
   water_level: string | null;
   depth_cm: string | null;
   recorded_at: string | null;
 };
-
-function getVisualBlockName(name: string) {
-  return name.replace("Bloco ", "").trim();
-}
 
 function formatTime(value?: string | null) {
   if (!value) {
@@ -24,62 +25,107 @@ function formatTime(value?: string | null) {
   });
 }
 
-export async function getBlocks(): Promise<WaterBlock[]> {
+function calculateStatus(
+  reservoirStatus: "ativo" | "pausado",
+  hasReading: boolean,
+  nivel: number,
+  criticalLevel: number,
+  attentionLevel: number
+): WaterStatus {
+  if (reservoirStatus === "pausado") return "Pausado";
+  if (!hasReading) return "Sem sinal";
+  if (nivel <= criticalLevel) return "Crítico";
+  if (nivel <= attentionLevel) return "Atenção";
+  return "Normal";
+}
+
+function calculateAlert(status: WaterStatus): string {
+  switch (status) {
+    case "Crítico":
+      return "Nível crítico. Ação imediata recomendada.";
+    case "Atenção":
+      return "Nível em faixa de atenção. Acompanhar.";
+    case "Sem sinal":
+      return "Nenhuma leitura recebida do sensor.";
+    case "Pausado":
+      return "Reservatório pausado. Fora do monitoramento ativo.";
+    default:
+      return "Operação dentro do padrão esperado.";
+  }
+}
+
+export async function getBlocks(condominiumId: string): Promise<WaterBlock[]> {
   const rows = (await sql`
     select
-      b.id as block_id,
+      r.id as reservoir_id,
+      r.name as reservoir_name,
+      r.status as reservoir_status,
+      r.critical_level_percent,
+      r.attention_level_percent,
+      r.expected_autonomy_hours,
       b.name as block_name,
-      r.water_level,
-      r.depth_cm,
-      r.recorded_at
-    from blocks b
+      readings.water_level,
+      readings.depth_cm,
+      readings.recorded_at
+    from reservoirs r
+    join blocks b on b.id = r.block_id
     left join lateral (
       select water_level, depth_cm, recorded_at
       from readings
-      where readings.block_id = b.id
+      where readings.reservoir_id = r.id
       order by recorded_at desc
       limit 12
-    ) r on true
-    order by b.name asc, r.recorded_at desc nulls last
-  `) as BlockReadingRow[];
+    ) readings on true
+    where b.condominium_id = ${condominiumId}
+    order by b.name asc, r.name asc, readings.recorded_at desc nulls last
+  `) as ReservoirReadingRow[];
 
-  const blocksById = new Map<
+  const byReservoir = new Map<
     string,
-    { name: string; readings: BlockReadingRow[] }
+    { row: ReservoirReadingRow; readings: ReservoirReadingRow[] }
   >();
 
   for (const row of rows) {
-    const entry = blocksById.get(row.block_id) ?? {
-      name: row.block_name,
-      readings: [],
-    };
+    const entry = byReservoir.get(row.reservoir_id) ?? { row, readings: [] };
 
     if (row.recorded_at) {
       entry.readings.push(row);
     }
 
-    blocksById.set(row.block_id, entry);
+    byReservoir.set(row.reservoir_id, entry);
   }
 
-  return Array.from(blocksById.entries()).map(([blockId, block]) => {
-    const lastReading = block.readings[0];
-
+  return Array.from(byReservoir.values()).map(({ row, readings }) => {
+    const lastReading = readings[0];
     const nivel = Number(lastReading?.water_level ?? 0);
     const profundidade = Number(lastReading?.depth_cm ?? 0);
+    const criticalLevel = Number(row.critical_level_percent);
+    const attentionLevel = Number(row.attention_level_percent);
+
+    const status = calculateStatus(
+      row.reservoir_status,
+      Boolean(lastReading),
+      nivel,
+      criticalLevel,
+      attentionLevel
+    );
+
+    const autonomia = row.expected_autonomy_hours
+      ? `${row.expected_autonomy_hours}h (parâmetro)`
+      : "Sem parâmetro configurado";
 
     return {
-      databaseId: blockId,
-      id: getVisualBlockName(block.name),
+      databaseId: row.reservoir_id,
+      id: row.reservoir_name,
+      blockName: row.block_name,
       nivel,
       profundidade,
-      status: nivel <= 20 ? "Crítico" : nivel <= 45 ? "Atenção" : "Normal",
+      status,
       tendencia: "Estável",
-      autonomia: nivel > 0 ? `${Math.floor(nivel / 3)}h` : "Sem leitura",
+      autonomia,
       atualizacao: formatTime(lastReading?.recorded_at),
-      alerta: lastReading
-        ? "Leitura real conectada ao banco de dados"
-        : "Nenhuma leitura recebida do sensor.",
-      historico: block.readings
+      alerta: calculateAlert(status),
+      historico: readings
         .slice()
         .reverse()
         .map((reading) => ({
@@ -91,12 +137,12 @@ export async function getBlocks(): Promise<WaterBlock[]> {
 }
 
 export async function saveReading(
-  blockDatabaseId: string,
+  reservoirId: string,
   waterLevel: number,
   depthCm: number
 ) {
   await sql`
-    insert into readings (block_id, water_level, depth_cm)
-    values (${blockDatabaseId}, ${waterLevel}, ${depthCm})
+    insert into readings (reservoir_id, water_level, depth_cm)
+    values (${reservoirId}, ${waterLevel}, ${depthCm})
   `;
 }

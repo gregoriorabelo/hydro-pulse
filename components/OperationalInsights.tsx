@@ -1,6 +1,6 @@
 import type { WaterBlock } from "@/types/block";
 
-type InsightSeverity = "Normal" | "Atenção" | "Crítico";
+type InsightSeverity = "Normal" | "Atenção" | "Crítico" | "Sem sinal" | "Pausado";
 
 type Insight = {
   message: string;
@@ -11,47 +11,26 @@ type OperationalInsightsProps = {
   blocks: WaterBlock[];
 };
 
+function getInsightMessage(block: WaterBlock): string {
+  switch (block.status) {
+    case "Crítico":
+      return `${block.id} (bloco ${block.blockName}) está em nível crítico e exige ação imediata.`;
+    case "Atenção":
+      return `${block.id} (bloco ${block.blockName}) está em faixa de atenção e deve ser acompanhado.`;
+    case "Sem sinal":
+      return `${block.id} (bloco ${block.blockName}) está sem leitura válida.`;
+    case "Pausado":
+      return `${block.id} (bloco ${block.blockName}) está pausado, fora do monitoramento ativo.`;
+    default:
+      return `${block.id} (bloco ${block.blockName}) mantém nível seguro e estabilidade operacional.`;
+  }
+}
+
 function getInsights(blocks: WaterBlock[]): Insight[] {
-  return blocks.flatMap((block) => {
-    const insights: Insight[] = [];
-
-    if (block.nivel < 35) {
-      insights.push({
-        severity: "Crítico",
-        message: `Bloco ${block.id} está em nível crítico e exige ação imediata.`,
-      });
-    }
-
-    if (block.nivel >= 35 && block.nivel <= 60) {
-      insights.push({
-        severity: "Atenção",
-        message: `Bloco ${block.id} está em faixa de atenção e deve ser acompanhado.`,
-      });
-    }
-
-    if (block.tendencia === "Caindo") {
-      insights.push({
-        severity: "Atenção",
-        message: `Bloco ${block.id} apresenta tendência de queda no reservatório.`,
-      });
-    }
-
-    if (block.tendencia === "Subindo") {
-      insights.push({
-        severity: "Normal",
-        message: `Bloco ${block.id} apresenta recuperação operacional.`,
-      });
-    }
-
-    if (block.nivel > 60 && block.tendencia === "Estável") {
-      insights.push({
-        severity: "Normal",
-        message: `Bloco ${block.id} mantém nível seguro e estabilidade operacional.`,
-      });
-    }
-
-    return insights;
-  });
+  return blocks.map((block) => ({
+    severity: block.status as InsightSeverity,
+    message: getInsightMessage(block),
+  }));
 }
 
 function getInsightStyle(severity: InsightSeverity) {
@@ -59,6 +38,8 @@ function getInsightStyle(severity: InsightSeverity) {
     Normal: "border-emerald-500/20 bg-emerald-500/10 text-emerald-100",
     Atenção: "border-yellow-500/20 bg-yellow-500/10 text-yellow-100",
     Crítico: "border-red-500/20 bg-red-500/10 text-red-100",
+    "Sem sinal": "border-slate-500/20 bg-slate-500/10 text-slate-300",
+    Pausado: "border-slate-500/20 bg-slate-500/10 text-slate-400",
   };
 
   return styles[severity];

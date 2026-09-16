@@ -3,6 +3,7 @@ export type WaterStatus =
   | "Atenção"
   | "Crítico"
   | "Sem sinal"
+  | "Pausado"
   | "Reabastecendo";
 
 export type WaterTrend =
@@ -21,6 +22,7 @@ export interface WaterHistoryPoint {
 export interface WaterBlock {
   databaseId: string;
   id: string;
+  blockName: string;
   nivel: number;
   profundidade: number;
   status: WaterStatus;

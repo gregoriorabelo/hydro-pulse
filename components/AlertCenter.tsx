@@ -8,27 +8,27 @@ function generateAlerts(blocks: WaterBlock[]) {
   return blocks.flatMap((block) => {
     const alerts = [];
 
-    if (block.atualizacao === "Sem sinal") {
+    if (block.status === "Sem sinal") {
       alerts.push({
         tipo: "Sensor offline",
         severidade: "Crítico",
-        mensagem: `Bloco ${block.id} está sem comunicação.`,
+        mensagem: `${block.id} (bloco ${block.blockName}) está sem comunicação.`,
       });
     }
 
-    if (block.nivel <= 35) {
+    if (block.status === "Crítico") {
       alerts.push({
         tipo: "Baixo nível",
         severidade: "Crítico",
-        mensagem: `Reservatório do bloco ${block.id} abaixo de 35%.`,
+        mensagem: `${block.id} (bloco ${block.blockName}) em nível crítico.`,
       });
     }
 
-    if (block.nivel > 35 && block.nivel <= 60) {
+    if (block.status === "Atenção") {
       alerts.push({
         tipo: "Atenção operacional",
         severidade: "Atenção",
-        mensagem: `Consumo elevado detectado no bloco ${block.id}.`,
+        mensagem: `${block.id} (bloco ${block.blockName}) em faixa de atenção.`,
       });
     }
 

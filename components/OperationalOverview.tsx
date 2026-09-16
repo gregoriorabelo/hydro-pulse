@@ -5,18 +5,22 @@ type OperationalOverviewProps = {
 };
 
 function getAverageLevel(blocks: WaterBlock[]) {
-  if (blocks.length === 0) return 0;
+  const withValidReading = blocks.filter(
+    (block) => block.status === "Normal" || block.status === "Atenção" || block.status === "Crítico"
+  );
 
-  const total = blocks.reduce((sum, block) => sum + block.nivel, 0);
-  return Math.round(total / blocks.length);
+  if (withValidReading.length === 0) return 0;
+
+  const total = withValidReading.reduce((sum, block) => sum + block.nivel, 0);
+  return Math.round(total / withValidReading.length);
 }
 
 function getCriticalBlocks(blocks: WaterBlock[]) {
-  return blocks.filter((block) => block.nivel < 35).length;
+  return blocks.filter((block) => block.status === "Crítico").length;
 }
 
 function getAttentionBlocks(blocks: WaterBlock[]) {
-  return blocks.filter((block) => block.nivel >= 35 && block.nivel <= 60).length;
+  return blocks.filter((block) => block.status === "Atenção").length;
 }
 
 function getOperationalRisk(blocks: WaterBlock[]) {

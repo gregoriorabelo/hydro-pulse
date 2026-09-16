@@ -1,0 +1,35 @@
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+import { requireSession } from "@/lib/session";
+import { createCondominium, listCondominiums } from "@/services/condominiumService";
+import type { CondominiumInput } from "@/types/entities";
+
+export async function GET(request: NextRequest) {
+  const session = await requireSession(request);
+
+  if (!session) {
+    return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
+  }
+
+  const condominiums = await listCondominiums();
+
+  return NextResponse.json({ condominiums });
+}
+
+export async function POST(request: NextRequest) {
+  const session = await requireSession(request);
+
+  if (!session) {
+    return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
+  }
+
+  const body = (await request.json()) as CondominiumInput;
+
+  if (!body.name) {
+    return NextResponse.json({ error: "name é obrigatório" }, { status: 400 });
+  }
+
+  const condominium = await createCondominium(body);
+
+  return NextResponse.json({ condominium }, { status: 201 });
+}

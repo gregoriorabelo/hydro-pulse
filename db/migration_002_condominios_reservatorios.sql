@@ -1,11 +1,5 @@
-create extension if not exists pgcrypto;
-
-create table if not exists users (
-  id uuid primary key default gen_random_uuid(),
-  email text unique not null,
-  password_hash text not null,
-  created_at timestamptz not null default now()
-);
+-- Migração 002: Condomínios, Reservatórios e Sensores
+-- Rode isso no SQL Editor do seu projeto Neon (depois do schema.sql original).
 
 create table if not exists condominiums (
   id uuid primary key default gen_random_uuid(),
@@ -21,12 +15,7 @@ create table if not exists condominiums (
   created_at timestamptz not null default now()
 );
 
-create table if not exists blocks (
-  id uuid primary key default gen_random_uuid(),
-  condominium_id uuid not null references condominiums(id) on delete cascade,
-  name text not null,
-  created_at timestamptz not null default now()
-);
+alter table blocks add column if not exists condominium_id uuid references condominiums(id) on delete cascade;
 
 create table if not exists reservoirs (
   id uuid primary key default gen_random_uuid(),
@@ -55,13 +44,12 @@ create table if not exists sensors (
   created_at timestamptz not null default now()
 );
 
-create table if not exists readings (
-  id uuid primary key default gen_random_uuid(),
-  reservoir_id uuid not null references reservoirs(id) on delete cascade,
-  water_level numeric not null,
-  depth_cm numeric,
-  recorded_at timestamptz not null default now()
-);
+alter table readings add column if not exists reservoir_id uuid references reservoirs(id) on delete cascade;
+
+-- As colunas antigas (blocks.sensor_identifier e readings.block_id) não são mais usadas.
+-- Como ainda não há sensor físico real conectado, é seguro removê-las agora.
+alter table blocks drop column if exists sensor_identifier;
+alter table readings drop column if exists block_id;
 
 create index if not exists blocks_condominium_id_idx on blocks (condominium_id);
 create index if not exists reservoirs_block_id_idx on reservoirs (block_id);

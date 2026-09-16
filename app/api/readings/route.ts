@@ -2,8 +2,8 @@ import { timingSafeEqual } from "node:crypto";
 import { NextResponse } from "next/server";
 import { sql } from "@/lib/db";
 
-type BlockRow = {
-  id: string;
+type SensorRow = {
+  reservoir_id: string | null;
 };
 
 function isAuthorized(request: Request) {
@@ -61,13 +61,13 @@ export async function POST(request: Request) {
       );
     }
 
-    const blockRows = (await sql`
-      select id from blocks where sensor_identifier = ${sensor_id}
-    `) as BlockRow[];
+    const sensorRows = (await sql`
+      select reservoir_id from sensors where serial = ${sensor_id}
+    `) as SensorRow[];
 
-    const block = blockRows[0];
+    const sensor = sensorRows[0];
 
-    if (!block) {
+    if (!sensor) {
       return NextResponse.json(
         {
           error: "Sensor não encontrado",
@@ -78,9 +78,20 @@ export async function POST(request: Request) {
       );
     }
 
+    if (!sensor.reservoir_id) {
+      return NextResponse.json(
+        {
+          error: "Sensor não está vinculado a um reservatório",
+        },
+        {
+          status: 422,
+        }
+      );
+    }
+
     await sql`
-      insert into readings (block_id, water_level, depth_cm)
-      values (${block.id}, ${water_level}, ${depth_cm ?? null})
+      insert into readings (reservoir_id, water_level, depth_cm)
+      values (${sensor.reservoir_id}, ${water_level}, ${depth_cm ?? null})
     `;
 
     return NextResponse.json({

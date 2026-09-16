@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { requireSession } from "@/lib/session";
-import { createBlock, listBlocksByCondominium } from "@/services/blockService";
+import { createReservoir, listReservoirsByCondominium } from "@/services/reservoirService";
+import type { ReservoirInput } from "@/types/entities";
 
 export async function GET(request: NextRequest) {
   const session = await requireSession(request);
@@ -16,9 +17,9 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "condominiumId é obrigatório" }, { status: 400 });
   }
 
-  const blocks = await listBlocksByCondominium(condominiumId);
+  const reservoirs = await listReservoirsByCondominium(condominiumId);
 
-  return NextResponse.json({ blocks });
+  return NextResponse.json({ reservoirs });
 }
 
 export async function POST(request: NextRequest) {
@@ -28,17 +29,17 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
   }
 
-  const body = await request.json();
-  const { condominiumId, name } = body;
+  const body = (await request.json()) as ReservoirInput & { blockId: string };
+  const { blockId, ...data } = body;
 
-  if (!condominiumId || !name) {
+  if (!blockId || !data.name || !data.type) {
     return NextResponse.json(
-      { error: "condominiumId e name são obrigatórios" },
+      { error: "blockId, name e type são obrigatórios" },
       { status: 400 }
     );
   }
 
-  const block = await createBlock(condominiumId, name);
+  const reservoir = await createReservoir(blockId, data);
 
-  return NextResponse.json({ block }, { status: 201 });
+  return NextResponse.json({ reservoir }, { status: 201 });
 }

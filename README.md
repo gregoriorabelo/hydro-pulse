@@ -15,8 +15,23 @@ Crie um arquivo `.env.local` (nunca comitado) com:
 
 ## Banco de dados
 
-O schema (tabelas `users`, `blocks`, `readings`) está em [`db/schema.sql`](./db/schema.sql).
-Rode esse arquivo uma vez no seu banco Neon (ex.: pelo SQL Editor do painel Neon).
+O schema completo (`users`, `condominiums`, `blocks`, `reservoirs`, `sensors`,
+`readings`) está em [`db/schema.sql`](./db/schema.sql). Para um banco novo,
+rode esse arquivo uma vez no SQL Editor do Neon.
+
+Se o seu banco já tinha o schema antigo (só `blocks`/`readings`, sem
+condomínios), rode em vez disso
+[`db/migration_002_condominios_reservatorios.sql`](./db/migration_002_condominios_reservatorios.sql)
+para atualizar a estrutura existente.
+
+## Estrutura de dados
+
+- **Condomínio** → **Bloco** (torre/setor) → **Reservatório** (caixa
+  d'água/cisterna, com limites de nível crítico/atenção próprios) →
+  **Sensor** (vinculado a um bloco e, opcionalmente, a um reservatório).
+- Leituras (`readings`) são sempre associadas a um reservatório.
+- O Painel (`/`) e os Alertas usam o reservatório ativo selecionado como
+  condomínio de contexto (seletor na barra lateral).
 
 ## Criando o primeiro usuário
 

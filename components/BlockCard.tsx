@@ -13,19 +13,13 @@ type BlockCardProps = {
   block: WaterBlock;
 };
 
-function calculateStatus(nivel: number, atualizacao: string): WaterStatus {
-  if (atualizacao === "Sem sinal") return "Sem sinal";
-  if (nivel < 35) return "Crítico";
-  if (nivel <= 60) return "Atenção";
-  return "Normal";
-}
-
 function getStatusStyle(status: WaterStatus) {
   const styles = {
     Normal: "border-emerald-500/20 bg-emerald-500/10 text-emerald-400",
     Atenção: "border-yellow-500/20 bg-yellow-500/10 text-yellow-300",
     Crítico: "border-red-500/20 bg-red-500/10 text-red-300",
     "Sem sinal": "border-slate-500/20 bg-slate-500/10 text-slate-300",
+    Pausado: "border-slate-500/20 bg-slate-500/10 text-slate-400",
     Reabastecendo: "border-brand-tech/20 bg-brand-tech/10 text-brand-cyan",
   };
 
@@ -33,25 +27,23 @@ function getStatusStyle(status: WaterStatus) {
 }
 
 export default function BlockCard({ block }: BlockCardProps) {
-  const status = calculateStatus(block.nivel, block.atualizacao);
-
   return (
     <div className="rounded-[2rem] border border-white/10 bg-white/[0.03] p-8">
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-slate-400">Bloco</p>
+          <p className="text-slate-400">Bloco {block.blockName}</p>
 
-          <h3 className="mt-2 text-6xl font-black text-white">
+          <h3 className="mt-2 text-5xl font-black text-white">
             {block.id}
           </h3>
         </div>
 
         <div
           className={`rounded-full border px-5 py-2 text-lg font-semibold ${getStatusStyle(
-            status
+            block.status
           )}`}
         >
-          {status}
+          {block.status}
         </div>
       </div>
 
