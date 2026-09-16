@@ -47,7 +47,13 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Usuário não encontrado." }, { status: 404 });
     }
 
-    await clearAttempts(user.email);
+    try {
+      await clearAttempts(user.email);
+    } catch (cleanupError) {
+      // Não crítico: a senha já foi trocada. Não deixamos essa etapa
+      // secundária derrubar a resposta de sucesso pro usuário.
+      console.error("Falha ao limpar tentativas de login:", cleanupError);
+    }
 
     return NextResponse.json({ success: true });
   } catch (error) {
