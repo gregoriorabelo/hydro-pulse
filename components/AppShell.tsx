@@ -11,11 +11,12 @@ const NAV_LINKS = [
   { href: "/blocos", label: "Blocos" },
   { href: "/reservatorios", label: "Reservatórios" },
   { href: "/sensores", label: "Sensores" },
+  { href: "/relatorios", label: "Relatórios" },
 ];
 
 const ADMIN_NAV_LINKS = [{ href: "/usuarios", label: "Usuários" }];
 
-const NAV_PLACEHOLDERS = ["Alertas", "Relatórios", "Configurações"];
+const NAV_PLACEHOLDERS = ["Alertas", "Configurações"];
 
 function CondominiumSelector() {
   const { condominiums, activeCondominiumId, setActiveCondominiumId, loading } =
