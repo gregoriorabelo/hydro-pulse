@@ -14,6 +14,9 @@ Crie um arquivo `.env.local` (nunca comitado) com:
 | `RESEND_API_KEY` | Chave da API do [Resend](https://resend.com), usada para enviar e-mails de redefinição de senha e alertas de nível crítico. Sem ela, esses e-mails simplesmente não são enviados (o resto do app funciona normalmente). |
 | `EMAIL_FROM` | (Opcional) Remetente dos e-mails, ex.: `HydroPulse <naoresponda@seudominio.com.br>`. Sem domínio verificado no Resend, usa o padrão de testes `onboarding@resend.dev` (só entrega para o e-mail da sua própria conta Resend). |
 | `NEXT_PUBLIC_APP_URL` | (Opcional) URL pública do app, usada para montar o link de redefinição de senha no e-mail. Sem ela, usa a URL da própria requisição. |
+| `NEXT_PUBLIC_SENTRY_DSN` | DSN do projeto no [Sentry](https://sentry.io), usado para capturar erros em produção (cliente e servidor). Sem ela, o Sentry fica desativado e o resto do app funciona normalmente. |
+| `SENTRY_ORG` / `SENTRY_PROJECT` | (Opcional) Slugs da organização e do projeto no Sentry, usados só durante o build pra enviar source maps (facilita ler stack traces de código minificado). |
+| `SENTRY_AUTH_TOKEN` | (Opcional, sensível) Token do Sentry para o build enviar os source maps. Sem ele, os erros continuam sendo capturados normalmente — só o stack trace fica menos legível. Gere em Sentry → Settings → Auth Tokens, com o escopo `project:releases`. |
 
 ## Banco de dados
 
