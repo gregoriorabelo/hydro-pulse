@@ -26,7 +26,7 @@ function getStatusStyle(status: WaterStatus) {
     Atenção: "border-yellow-500/20 bg-yellow-500/10 text-yellow-300",
     Crítico: "border-red-500/20 bg-red-500/10 text-red-300",
     "Sem sinal": "border-slate-500/20 bg-slate-500/10 text-slate-300",
-    Reabastecendo: "border-sky-500/20 bg-sky-500/10 text-sky-300",
+    Reabastecendo: "border-brand-tech/20 bg-brand-tech/10 text-brand-cyan",
   };
 
   return styles[status];
@@ -56,7 +56,7 @@ export default function BlockCard({ block }: BlockCardProps) {
       </div>
 
       <div className="mt-8 grid grid-cols-2 gap-4">
-        <div className="rounded-3xl bg-[#021126] p-5">
+        <div className="rounded-3xl bg-brand-petrol p-5">
           <p className="text-slate-400">Nível atual</p>
 
           <h4 className="mt-4 text-5xl font-black text-white">
@@ -64,7 +64,7 @@ export default function BlockCard({ block }: BlockCardProps) {
           </h4>
         </div>
 
-        <div className="rounded-3xl bg-[#021126] p-5">
+        <div className="rounded-3xl bg-brand-petrol p-5">
           <p className="text-slate-400">Profundidade</p>
 
           <h4 className="mt-4 text-5xl font-black text-white">
@@ -73,7 +73,7 @@ export default function BlockCard({ block }: BlockCardProps) {
         </div>
       </div>
 
-      <div className="mt-6 h-56 rounded-3xl bg-[#021126] p-4">
+      <div className="mt-6 h-56 rounded-3xl bg-brand-petrol p-4">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={block.historico}>
             <defs>
@@ -84,8 +84,8 @@ export default function BlockCard({ block }: BlockCardProps) {
                 x2="0"
                 y2="1"
               >
-                <stop offset="0%" stopColor="#38BDF8" stopOpacity={0.45} />
-                <stop offset="100%" stopColor="#38BDF8" stopOpacity={0.02} />
+                <stop offset="0%" stopColor="#00B8FF" stopOpacity={0.45} />
+                <stop offset="100%" stopColor="#00B8FF" stopOpacity={0.02} />
               </linearGradient>
             </defs>
 
@@ -117,7 +117,7 @@ export default function BlockCard({ block }: BlockCardProps) {
             <Area
               type="monotone"
               dataKey="valor"
-              stroke="#38BDF8"
+              stroke="#00B8FF"
               strokeWidth={3}
               fill={`url(#water-gradient-${block.id})`}
             />
@@ -125,7 +125,7 @@ export default function BlockCard({ block }: BlockCardProps) {
         </ResponsiveContainer>
       </div>
 
-      <div className="mt-6 rounded-3xl bg-[#021126] p-5">
+      <div className="mt-6 rounded-3xl bg-brand-petrol p-5">
         <p className="text-slate-400">Autonomia estimada</p>
 
         <h4 className="mt-3 text-3xl font-bold text-white">
@@ -137,8 +137,8 @@ export default function BlockCard({ block }: BlockCardProps) {
         </p>
       </div>
 
-      <div className="mt-6 rounded-3xl border border-[#D5B56B]/20 bg-[#D5B56B]/10 p-5">
-        <p className="font-semibold text-[#F4D58D]">
+      <div className="mt-6 rounded-3xl border border-brand-tech/20 bg-brand-tech/10 p-5">
+        <p className="font-semibold text-brand-cyan">
           Alerta Operacional
         </p>
 

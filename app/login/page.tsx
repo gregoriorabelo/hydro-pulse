@@ -33,18 +33,27 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#07111F] p-6 text-white">
+    <div className="flex min-h-screen items-center justify-center bg-brand-deep p-6 text-white">
       <div className="w-full max-w-md rounded-[2rem] border border-white/10 bg-white/[0.03] p-10">
         <div className="mb-8 text-center">
-          <p className="text-xs uppercase tracking-[0.30em] text-[#D5B56B]">
-            Magnacon
-          </p>
+          <img
+            src="/images/hydropulse-icon.png"
+            alt="HydroPulse"
+            className="mx-auto h-16 w-auto object-contain"
+          />
 
-          <h1 className="mt-3 text-3xl font-black text-white">
-            Hydro Pulse
+          <h1 className="mt-4 text-3xl font-black tracking-tight">
+            <span className="text-white">Hydro</span>
+            <span className="bg-gradient-to-r from-brand-tech to-brand-cyan bg-clip-text text-transparent">
+              Pulse
+            </span>
           </h1>
 
-          <p className="mt-3 text-slate-400">
+          <p className="mt-2 text-[10px] uppercase tracking-[0.25em] text-brand-gray">
+            Magnacon Gestão Condominial
+          </p>
+
+          <p className="mt-4 text-slate-400">
             Entre com sua conta para acessar o painel.
           </p>
         </div>
@@ -65,7 +74,7 @@ export default function LoginPage() {
               autoComplete="email"
               value={email}
               onChange={(event) => setEmail(event.target.value)}
-              className="w-full rounded-2xl border border-white/10 bg-[#021126] px-4 py-3 text-white outline-none focus:border-[#D5B56B]/50"
+              className="w-full rounded-2xl border border-white/10 bg-brand-petrol px-4 py-3 text-white outline-none focus:border-brand-cyan/50"
             />
           </div>
 
@@ -84,7 +93,7 @@ export default function LoginPage() {
               autoComplete="current-password"
               value={password}
               onChange={(event) => setPassword(event.target.value)}
-              className="w-full rounded-2xl border border-white/10 bg-[#021126] px-4 py-3 text-white outline-none focus:border-[#D5B56B]/50"
+              className="w-full rounded-2xl border border-white/10 bg-brand-petrol px-4 py-3 text-white outline-none focus:border-brand-cyan/50"
             />
           </div>
 
@@ -97,7 +106,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={submitting}
-            className="w-full rounded-2xl bg-[#D5B56B] px-4 py-3 font-semibold text-[#07111F] transition hover:bg-[#e2c583] disabled:opacity-60"
+            className="w-full rounded-2xl bg-brand-gold px-4 py-3 font-semibold text-brand-deep transition hover:bg-[#e0c15c] disabled:opacity-60"
           >
             {submitting ? "Entrando..." : "Entrar"}
           </button>

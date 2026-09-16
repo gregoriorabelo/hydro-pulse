@@ -1,4 +1,4 @@
-# Hydro Pulse
+# HydroPulse
 
 Monitoramento hídrico inteligente para condomínios, com visão operacional,
 alertas preventivos e inteligência gerencial. Projeto Next.js da Magnacon

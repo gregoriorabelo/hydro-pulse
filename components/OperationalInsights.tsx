@@ -72,7 +72,7 @@ export default function OperationalInsights({
   return (
     <section className="rounded-[2rem] border border-white/10 bg-white/[0.03] p-8">
       <div>
-        <p className="text-sm uppercase tracking-[0.28em] text-[#D5B56B]">
+        <p className="text-sm uppercase tracking-[0.28em] text-brand-cyan">
           Inteligência Operacional
         </p>
 

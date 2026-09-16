@@ -5,6 +5,8 @@ type OperationalOverviewProps = {
 };
 
 function getAverageLevel(blocks: WaterBlock[]) {
+  if (blocks.length === 0) return 0;
+
   const total = blocks.reduce((sum, block) => sum + block.nivel, 0);
   return Math.round(total / blocks.length);
 }
@@ -35,7 +37,7 @@ export default function OperationalOverview({ blocks }: OperationalOverviewProps
 
   return (
     <section className="rounded-[2rem] border border-white/10 bg-white/[0.03] p-8">
-      <p className="text-sm uppercase tracking-[0.28em] text-[#D5B56B]">
+      <p className="text-sm uppercase tracking-[0.28em] text-brand-cyan">
         Visão Gerencial
       </p>
 
@@ -44,22 +46,22 @@ export default function OperationalOverview({ blocks }: OperationalOverviewProps
       </h2>
 
       <div className="mt-8 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
-        <div className="rounded-3xl bg-[#021126] p-6">
+        <div className="rounded-3xl bg-brand-petrol p-6">
           <p className="text-slate-400">Nível médio</p>
           <h3 className="mt-4 text-4xl font-black text-white">{averageLevel}%</h3>
         </div>
 
-        <div className="rounded-3xl bg-[#021126] p-6">
+        <div className="rounded-3xl bg-brand-petrol p-6">
           <p className="text-slate-400">Blocos críticos</p>
           <h3 className="mt-4 text-4xl font-black text-white">{criticalBlocks}</h3>
         </div>
 
-        <div className="rounded-3xl bg-[#021126] p-6">
+        <div className="rounded-3xl bg-brand-petrol p-6">
           <p className="text-slate-400">Blocos em atenção</p>
           <h3 className="mt-4 text-4xl font-black text-white">{attentionBlocks}</h3>
         </div>
 
-        <div className="rounded-3xl bg-[#021126] p-6">
+        <div className="rounded-3xl bg-brand-petrol p-6">
           <p className="text-slate-400">Risco de falta d’água</p>
           <h3 className="mt-4 text-4xl font-black text-white">{risk}</h3>
         </div>

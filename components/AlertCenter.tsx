@@ -53,7 +53,7 @@ export default function AlertCenter({
     <section className="rounded-[2rem] border border-white/10 bg-white/[0.03] p-8">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-sm uppercase tracking-[0.30em] text-[#D5B56B]">
+          <p className="text-sm uppercase tracking-[0.30em] text-brand-cyan">
             Central operacional
           </p>
 
@@ -62,7 +62,7 @@ export default function AlertCenter({
           </h2>
         </div>
 
-        <div className="rounded-2xl border border-white/10 bg-[#021126] px-5 py-3">
+        <div className="rounded-2xl border border-white/10 bg-brand-petrol px-5 py-3">
           <p className="text-sm text-slate-400">
             Alertas ativos
           </p>
