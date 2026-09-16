@@ -10,9 +10,10 @@ const NAV_LINKS = [
   { href: "/condominios", label: "Condomínios" },
   { href: "/blocos", label: "Blocos" },
   { href: "/reservatorios", label: "Reservatórios" },
+  { href: "/sensores", label: "Sensores" },
 ];
 
-const NAV_PLACEHOLDERS = ["Sensores", "Alertas", "Relatórios", "Configurações"];
+const NAV_PLACEHOLDERS = ["Alertas", "Relatórios", "Configurações"];
 
 function CondominiumSelector() {
   const { condominiums, activeCondominiumId, setActiveCondominiumId, loading } =

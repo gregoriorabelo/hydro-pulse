@@ -63,3 +63,21 @@ export type ReservoirInput = {
   readingIntervalMinutes?: number | null;
   expectedAutonomyHours?: number | null;
 };
+
+export type Sensor = {
+  id: string;
+  blockId: string;
+  reservoirId: string | null;
+  name: string;
+  serial: string;
+  model: string | null;
+  createdAt: string;
+};
+
+export type SensorInput = {
+  blockId: string;
+  reservoirId?: string | null;
+  name: string;
+  serial: string;
+  model?: string | null;
+};
