@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { requireSession } from "@/lib/session";
+import { canWrite, getCondominiumIdForBlock, getCondominiumRole } from "@/lib/access";
 import { createSensor, listSensorsByCondominium } from "@/services/sensorService";
 import type { SensorInput } from "@/types/entities";
 
@@ -23,6 +24,12 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "condominiumId é obrigatório" }, { status: 400 });
   }
 
+  const role = await getCondominiumRole(session, condominiumId);
+
+  if (!role) {
+    return NextResponse.json({ error: "Sem acesso a este condomínio" }, { status: 403 });
+  }
+
   const sensors = await listSensorsByCondominium(condominiumId);
 
   return NextResponse.json({ sensors });
@@ -42,6 +49,18 @@ export async function POST(request: NextRequest) {
       { error: "blockId, name e serial são obrigatórios" },
       { status: 400 }
     );
+  }
+
+  const condominiumId = await getCondominiumIdForBlock(body.blockId);
+
+  if (!condominiumId) {
+    return NextResponse.json({ error: "Bloco não encontrado" }, { status: 404 });
+  }
+
+  const role = await getCondominiumRole(session, condominiumId);
+
+  if (!canWrite(role)) {
+    return NextResponse.json({ error: "Sem permissão para este condomínio" }, { status: 403 });
   }
 
   try {

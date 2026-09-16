@@ -45,29 +45,29 @@ export default function OperationalOverview({ blocks }: OperationalOverviewProps
         Visão Gerencial
       </p>
 
-      <h2 className="mt-3 text-4xl font-black text-white">
+      <h2 className="mt-3 text-3xl font-black text-white">
         Saúde operacional do condomínio
       </h2>
 
-      <div className="mt-8 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
-        <div className="rounded-3xl bg-brand-petrol p-6">
+      <div className="mt-8 grid grid-cols-2 gap-5">
+        <div className="min-w-0 rounded-3xl bg-brand-petrol p-6">
           <p className="text-slate-400">Nível médio</p>
-          <h3 className="mt-4 text-4xl font-black text-white">{averageLevel}%</h3>
+          <h3 className="mt-4 text-3xl font-black text-white">{averageLevel}%</h3>
         </div>
 
-        <div className="rounded-3xl bg-brand-petrol p-6">
+        <div className="min-w-0 rounded-3xl bg-brand-petrol p-6">
           <p className="text-slate-400">Blocos críticos</p>
-          <h3 className="mt-4 text-4xl font-black text-white">{criticalBlocks}</h3>
+          <h3 className="mt-4 text-3xl font-black text-white">{criticalBlocks}</h3>
         </div>
 
-        <div className="rounded-3xl bg-brand-petrol p-6">
+        <div className="min-w-0 rounded-3xl bg-brand-petrol p-6">
           <p className="text-slate-400">Blocos em atenção</p>
-          <h3 className="mt-4 text-4xl font-black text-white">{attentionBlocks}</h3>
+          <h3 className="mt-4 text-3xl font-black text-white">{attentionBlocks}</h3>
         </div>
 
-        <div className="rounded-3xl bg-brand-petrol p-6">
+        <div className="min-w-0 rounded-3xl bg-brand-petrol p-6">
           <p className="text-slate-400">Risco de falta d’água</p>
-          <h3 className="mt-4 text-4xl font-black text-white">{risk}</h3>
+          <h3 className="mt-4 text-3xl font-black text-white">{risk}</h3>
         </div>
       </div>
     </section>

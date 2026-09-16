@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { requireSession } from "@/lib/session";
+import { canWrite, getCondominiumIdForBlock, getCondominiumRole } from "@/lib/access";
 import { createReservoir, listReservoirsByCondominium } from "@/services/reservoirService";
 import type { ReservoirInput } from "@/types/entities";
 
@@ -15,6 +16,12 @@ export async function GET(request: NextRequest) {
 
   if (!condominiumId) {
     return NextResponse.json({ error: "condominiumId é obrigatório" }, { status: 400 });
+  }
+
+  const role = await getCondominiumRole(session, condominiumId);
+
+  if (!role) {
+    return NextResponse.json({ error: "Sem acesso a este condomínio" }, { status: 403 });
   }
 
   const reservoirs = await listReservoirsByCondominium(condominiumId);
@@ -37,6 +44,18 @@ export async function POST(request: NextRequest) {
       { error: "blockId, name e type são obrigatórios" },
       { status: 400 }
     );
+  }
+
+  const condominiumId = await getCondominiumIdForBlock(blockId);
+
+  if (!condominiumId) {
+    return NextResponse.json({ error: "Bloco não encontrado" }, { status: 404 });
+  }
+
+  const role = await getCondominiumRole(session, condominiumId);
+
+  if (!canWrite(role)) {
+    return NextResponse.json({ error: "Sem permissão para este condomínio" }, { status: 403 });
   }
 
   const reservoir = await createReservoir(blockId, data);

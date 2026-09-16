@@ -127,7 +127,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="grid gap-6 xl:grid-cols-3">
+      <section className="grid items-start gap-6 xl:grid-cols-3">
         <OperationalOverview blocks={blocks} />
         <AlertCenter blocks={blocks} />
         <OperationalInsights blocks={blocks} />

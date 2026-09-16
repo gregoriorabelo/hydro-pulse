@@ -67,6 +67,13 @@ create table if not exists user_condominiums (
   unique (user_id, condominium_id)
 );
 
+create table if not exists login_attempts (
+  email text primary key,
+  attempts integer not null default 0,
+  locked_until timestamptz,
+  updated_at timestamptz not null default now()
+);
+
 create table if not exists readings (
   id uuid primary key default gen_random_uuid(),
   reservoir_id uuid not null references reservoirs(id) on delete cascade,

@@ -57,17 +57,17 @@ export default function OperationalInsights({
           Inteligência Operacional
         </p>
 
-        <h2 className="mt-3 text-4xl font-black text-white">
+        <h2 className="mt-3 text-3xl font-black text-white">
           Diagnósticos automáticos
         </h2>
 
-        <p className="mt-4 max-w-3xl text-lg text-slate-400">
+        <p className="mt-4 text-slate-400">
           Leitura inteligente dos reservatórios com base em nível, tendência e
           risco operacional.
         </p>
       </div>
 
-      <div className="mt-8 grid gap-4 lg:grid-cols-2">
+      <div className="mt-8 space-y-4">
         {insights.map((insight, index) => (
           <div
             key={index}
@@ -75,13 +75,11 @@ export default function OperationalInsights({
               insight.severity
             )}`}
           >
-            <div className="flex items-center justify-between gap-4">
-              <p>{insight.message}</p>
+            <span className="inline-block rounded-full bg-black/20 px-3 py-1 text-xs font-semibold">
+              {insight.severity}
+            </span>
 
-              <span className="shrink-0 rounded-full bg-black/20 px-3 py-1 text-xs font-semibold">
-                {insight.severity}
-              </span>
-            </div>
+            <p className="mt-3">{insight.message}</p>
           </div>
         ))}
       </div>

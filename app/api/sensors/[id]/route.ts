@@ -1,6 +1,12 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { requireSession } from "@/lib/session";
+import {
+  canWrite,
+  getCondominiumIdForBlock,
+  getCondominiumIdForSensor,
+  getCondominiumRole,
+} from "@/lib/access";
 import { deleteSensor, updateSensor } from "@/services/sensorService";
 import type { SensorInput } from "@/types/entities";
 
@@ -27,6 +33,28 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       { error: "blockId, name e serial são obrigatórios" },
       { status: 400 }
     );
+  }
+
+  const currentCondominiumId = await getCondominiumIdForSensor(id);
+
+  if (!currentCondominiumId) {
+    return NextResponse.json({ error: "Sensor não encontrado" }, { status: 404 });
+  }
+
+  const targetCondominiumId = await getCondominiumIdForBlock(body.blockId);
+
+  if (!targetCondominiumId) {
+    return NextResponse.json({ error: "Bloco não encontrado" }, { status: 404 });
+  }
+
+  const currentRole = await getCondominiumRole(session, currentCondominiumId);
+  const targetRole =
+    targetCondominiumId === currentCondominiumId
+      ? currentRole
+      : await getCondominiumRole(session, targetCondominiumId);
+
+  if (!canWrite(currentRole) || !canWrite(targetRole)) {
+    return NextResponse.json({ error: "Sem permissão para este condomínio" }, { status: 403 });
   }
 
   try {
@@ -57,6 +85,18 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
   }
 
   const { id } = await params;
+
+  const condominiumId = await getCondominiumIdForSensor(id);
+
+  if (!condominiumId) {
+    return NextResponse.json({ error: "Sensor não encontrado" }, { status: 404 });
+  }
+
+  const role = await getCondominiumRole(session, condominiumId);
+
+  if (!canWrite(role)) {
+    return NextResponse.json({ error: "Sem permissão para este condomínio" }, { status: 403 });
+  }
 
   await deleteSensor(id);
 

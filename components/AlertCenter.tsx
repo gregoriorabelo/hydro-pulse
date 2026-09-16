@@ -51,13 +51,13 @@ export default function AlertCenter({
 
   return (
     <section className="rounded-[2rem] border border-white/10 bg-white/[0.03] p-8">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <p className="text-sm uppercase tracking-[0.30em] text-brand-cyan">
             Central operacional
           </p>
 
-          <h2 className="mt-4 text-5xl font-black text-white">
+          <h2 className="mt-4 text-3xl font-black text-white">
             Alertas Inteligentes
           </h2>
         </div>
@@ -81,21 +81,13 @@ export default function AlertCenter({
               alert.severidade
             )}`}
           >
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="font-semibold text-white">
-                  {alert.tipo}
-                </p>
-
-                <p className="mt-2 text-slate-300">
-                  {alert.mensagem}
-                </p>
-              </div>
-
-              <div className="rounded-full bg-black/20 px-4 py-2 text-sm font-semibold text-white">
-                {alert.severidade}
-              </div>
+            <div className="inline-block rounded-full bg-black/20 px-4 py-2 text-sm font-semibold text-white">
+              {alert.severidade}
             </div>
+
+            <p className="mt-3 font-semibold text-white">{alert.tipo}</p>
+
+            <p className="mt-2 text-slate-300">{alert.mensagem}</p>
           </div>
         ))}
       </div>

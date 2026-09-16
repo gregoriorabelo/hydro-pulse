@@ -2,6 +2,7 @@ import { compare } from "bcryptjs";
 import { NextResponse } from "next/server";
 import { sql } from "@/lib/db";
 import { createSessionToken, sessionCookieOptions } from "@/lib/auth";
+import { clearAttempts, getLockStatus, recordFailedAttempt } from "@/lib/loginAttempts";
 
 type UserRow = {
   id: string;
@@ -21,6 +22,17 @@ export async function POST(request: Request) {
       );
     }
 
+    const lockStatus = await getLockStatus(email);
+
+    if (lockStatus.locked) {
+      return NextResponse.json(
+        {
+          error: `Muitas tentativas de login. Tente novamente em ${lockStatus.minutesRemaining} minuto(s).`,
+        },
+        { status: 429 }
+      );
+    }
+
     const rows = (await sql`
       select id, email, password_hash, role from users where email = ${email}
     `) as UserRow[];
@@ -28,6 +40,8 @@ export async function POST(request: Request) {
     const user = rows[0];
 
     if (!user) {
+      await recordFailedAttempt(email);
+
       return NextResponse.json(
         { error: "E-mail ou senha inválidos." },
         { status: 401 }
@@ -37,11 +51,15 @@ export async function POST(request: Request) {
     const passwordMatches = await compare(password, user.password_hash);
 
     if (!passwordMatches) {
+      await recordFailedAttempt(email);
+
       return NextResponse.json(
         { error: "E-mail ou senha inválidos." },
         { status: 401 }
       );
     }
+
+    await clearAttempts(email);
 
     const token = await createSessionToken({
       userId: user.id,

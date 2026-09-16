@@ -24,7 +24,8 @@ export default function LoginPage() {
     setSubmitting(false);
 
     if (!response.ok) {
-      setError("E-mail ou senha inválidos.");
+      const data = await response.json().catch(() => null);
+      setError(data?.error ?? "E-mail ou senha inválidos.");
       return;
     }
 

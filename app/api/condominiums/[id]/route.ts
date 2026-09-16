@@ -13,6 +13,10 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
   }
 
+  if (session.role !== "admin") {
+    return NextResponse.json({ error: "Apenas administradores podem editar condomínios" }, { status: 403 });
+  }
+
   const { id } = await params;
   const body = (await request.json()) as CondominiumInput;
 
