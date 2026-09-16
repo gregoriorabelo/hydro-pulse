@@ -5,8 +5,9 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { CondominiumProvider, useCondominiumContext } from "@/lib/condominium-context";
 
-const NAV_LINKS = [
+const NAV_LINKS_BEFORE_ADMIN = [
   { href: "/", label: "Painel" },
+  { href: "/alertas", label: "Alertas" },
   { href: "/condominios", label: "Condomínios" },
   { href: "/blocos", label: "Blocos" },
   { href: "/reservatorios", label: "Reservatórios" },
@@ -16,7 +17,7 @@ const NAV_LINKS = [
 
 const ADMIN_NAV_LINKS = [{ href: "/usuarios", label: "Usuários" }];
 
-const NAV_PLACEHOLDERS = ["Alertas", "Configurações"];
+const NAV_LINKS_AFTER_ADMIN = [{ href: "/configuracoes", label: "Configurações" }];
 
 function CondominiumSelector() {
   const { condominiums, activeCondominiumId, setActiveCondominiumId, loading } =
@@ -107,7 +108,11 @@ export default function AppShell({ children }: { children: ReactNode }) {
           </div>
 
           <nav className="mt-8 space-y-3 text-sm">
-            {[...NAV_LINKS, ...(isAdmin ? ADMIN_NAV_LINKS : [])].map((item) => {
+            {[
+              ...NAV_LINKS_BEFORE_ADMIN,
+              ...(isAdmin ? ADMIN_NAV_LINKS : []),
+              ...NAV_LINKS_AFTER_ADMIN,
+            ].map((item) => {
               const active = pathname === item.href;
 
               return (
@@ -124,18 +129,6 @@ export default function AppShell({ children }: { children: ReactNode }) {
                 </Link>
               );
             })}
-
-            {NAV_PLACEHOLDERS.map((item) => (
-              <button
-                key={item}
-                type="button"
-                disabled
-                className="w-full cursor-not-allowed rounded-2xl px-4 py-3 text-left text-slate-600"
-                title="Em desenvolvimento"
-              >
-                {item}
-              </button>
-            ))}
           </nav>
 
           <div className="mt-12 rounded-3xl border border-brand-tech/20 bg-brand-tech/10 p-5">
