@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import type { WaterBlock } from "@/types/block";
-import { getBlocks } from "@/services/waterService";
 
 export function useWaterMonitoring() {
   const [blocks, setBlocks] = useState<WaterBlock[]>([]);
@@ -12,12 +11,14 @@ export function useWaterMonitoring() {
     let ignore = false;
 
     function loadBlocks() {
-      getBlocks().then((data) => {
-        if (ignore) return;
+      fetch("/api/blocks")
+        .then((response) => response.json())
+        .then((data) => {
+          if (ignore) return;
 
-        setBlocks(data);
-        setLoading(false);
-      });
+          setBlocks(data.blocks ?? []);
+          setLoading(false);
+        });
     }
 
     loadBlocks();
