@@ -7,6 +7,7 @@ type UserRow = {
   id: string;
   email: string;
   password_hash: string;
+  role: "admin" | "operador";
 };
 
 export async function POST(request: Request) {
@@ -21,7 +22,7 @@ export async function POST(request: Request) {
     }
 
     const rows = (await sql`
-      select id, email, password_hash from users where email = ${email}
+      select id, email, password_hash, role from users where email = ${email}
     `) as UserRow[];
 
     const user = rows[0];
@@ -45,6 +46,7 @@ export async function POST(request: Request) {
     const token = await createSessionToken({
       userId: user.id,
       email: user.email,
+      role: user.role,
     });
 
     const response = NextResponse.json({ success: true });

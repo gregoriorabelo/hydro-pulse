@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { CondominiumProvider, useCondominiumContext } from "@/lib/condominium-context";
@@ -12,6 +12,8 @@ const NAV_LINKS = [
   { href: "/reservatorios", label: "Reservatórios" },
   { href: "/sensores", label: "Sensores" },
 ];
+
+const ADMIN_NAV_LINKS = [{ href: "/usuarios", label: "Usuários" }];
 
 const NAV_PLACEHOLDERS = ["Alertas", "Relatórios", "Configurações"];
 
@@ -52,6 +54,15 @@ function CondominiumSelector() {
 export default function AppShell({ children }: { children: ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/auth/me")
+      .then((response) => (response.ok ? response.json() : null))
+      .then((data: { role?: string } | null) => {
+        setIsAdmin(data?.role === "admin");
+      });
+  }, []);
 
   async function handleLogout() {
     await fetch("/api/auth/logout", { method: "POST" });
@@ -95,7 +106,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
           </div>
 
           <nav className="mt-8 space-y-3 text-sm">
-            {NAV_LINKS.map((item) => {
+            {[...NAV_LINKS, ...(isAdmin ? ADMIN_NAV_LINKS : [])].map((item) => {
               const active = pathname === item.href;
 
               return (

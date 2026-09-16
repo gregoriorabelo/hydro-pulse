@@ -11,7 +11,9 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
   }
 
-  const condominiums = await listCondominiums();
+  const condominiums = await listCondominiums(
+    session.role === "admin" ? undefined : session.userId
+  );
 
   return NextResponse.json({ condominiums });
 }
@@ -21,6 +23,10 @@ export async function POST(request: NextRequest) {
 
   if (!session) {
     return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
+  }
+
+  if (session.role !== "admin") {
+    return NextResponse.json({ error: "Apenas administradores podem cadastrar condomínios" }, { status: 403 });
   }
 
   const body = (await request.json()) as CondominiumInput;

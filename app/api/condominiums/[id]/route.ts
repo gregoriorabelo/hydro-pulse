@@ -36,6 +36,10 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
   }
 
+  if (session.role !== "admin") {
+    return NextResponse.json({ error: "Apenas administradores podem excluir condomínios" }, { status: 403 });
+  }
+
   const { id } = await params;
 
   await deleteCondominium(id);

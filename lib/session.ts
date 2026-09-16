@@ -5,3 +5,8 @@ export async function requireSession(request: NextRequest) {
   const token = request.cookies.get("hydro_pulse_session")?.value;
   return token ? await verifySessionToken(token) : null;
 }
+
+export async function requireAdmin(request: NextRequest) {
+  const session = await requireSession(request);
+  return session && session.role === "admin" ? session : null;
+}

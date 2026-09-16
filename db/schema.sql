@@ -2,8 +2,10 @@ create extension if not exists pgcrypto;
 
 create table if not exists users (
   id uuid primary key default gen_random_uuid(),
+  name text,
   email text unique not null,
   password_hash text not null,
+  role text not null default 'operador' check (role in ('admin', 'operador')),
   created_at timestamptz not null default now()
 );
 
@@ -55,6 +57,16 @@ create table if not exists sensors (
   created_at timestamptz not null default now()
 );
 
+create table if not exists user_condominiums (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references users(id) on delete cascade,
+  condominium_id uuid not null references condominiums(id) on delete cascade,
+  role text not null default 'visualizador'
+    check (role in ('admin', 'sindico', 'operador', 'visualizador')),
+  created_at timestamptz not null default now(),
+  unique (user_id, condominium_id)
+);
+
 create table if not exists readings (
   id uuid primary key default gen_random_uuid(),
   reservoir_id uuid not null references reservoirs(id) on delete cascade,
@@ -63,6 +75,8 @@ create table if not exists readings (
   recorded_at timestamptz not null default now()
 );
 
+create index if not exists user_condominiums_user_id_idx on user_condominiums (user_id);
+create index if not exists user_condominiums_condominium_id_idx on user_condominiums (condominium_id);
 create index if not exists blocks_condominium_id_idx on blocks (condominium_id);
 create index if not exists reservoirs_block_id_idx on reservoirs (block_id);
 create index if not exists sensors_block_id_idx on sensors (block_id);

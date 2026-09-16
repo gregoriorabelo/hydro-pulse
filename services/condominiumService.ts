@@ -31,10 +31,17 @@ function mapRow(row: Row): Condominium {
   };
 }
 
-export async function listCondominiums(): Promise<Condominium[]> {
-  const rows = (await sql`
-    select * from condominiums order by name asc
-  `) as Row[];
+export async function listCondominiums(userId?: string): Promise<Condominium[]> {
+  const rows = userId
+    ? ((await sql`
+        select c.* from condominiums c
+        join user_condominiums uc on uc.condominium_id = c.id
+        where uc.user_id = ${userId}
+        order by c.name asc
+      `) as Row[])
+    : ((await sql`
+        select * from condominiums order by name asc
+      `) as Row[]);
 
   return rows.map(mapRow);
 }

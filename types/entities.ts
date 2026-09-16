@@ -81,3 +81,36 @@ export type SensorInput = {
   serial: string;
   model?: string | null;
 };
+
+export type GlobalRole = "admin" | "operador";
+export type CondominiumRole = "admin" | "sindico" | "operador" | "visualizador";
+
+export const CONDOMINIUM_ROLE_LABELS: Record<CondominiumRole, string> = {
+  admin: "Administrador",
+  sindico: "Síndico",
+  operador: "Operador",
+  visualizador: "Visualizador",
+};
+
+export type UserCondominiumAccess = {
+  condominiumId: string;
+  condominiumName: string;
+  role: CondominiumRole;
+};
+
+export type User = {
+  id: string;
+  name: string | null;
+  email: string;
+  role: GlobalRole;
+  createdAt: string;
+  condominiums: UserCondominiumAccess[];
+};
+
+export type UserInput = {
+  name?: string | null;
+  email: string;
+  password?: string;
+  role: GlobalRole;
+  condominiums: { condominiumId: string; role: CondominiumRole }[];
+};
