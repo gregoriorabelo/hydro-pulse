@@ -5,6 +5,7 @@ import Modal from "@/components/Modal";
 import ActionsMenu from "@/components/ActionsMenu";
 import { Field, NumberField } from "@/components/FormField";
 import { useCondominiumContext } from "@/lib/condominium-context";
+import { formatCNPJ, formatPhone } from "@/lib/masks";
 import type { Condominium, CondominiumInput } from "@/types/entities";
 
 const EMPTY_FORM: CondominiumInput = {
@@ -168,7 +169,7 @@ export default function CondominiosPage() {
               <Field
                 label="CNPJ"
                 value={form.cnpj ?? ""}
-                onChange={(v) => setForm({ ...form, cnpj: v })}
+                onChange={(v) => setForm({ ...form, cnpj: formatCNPJ(v) })}
               />
             </div>
 
@@ -176,7 +177,7 @@ export default function CondominiosPage() {
               <Field
                 label="Telefone"
                 value={form.phone ?? ""}
-                onChange={(v) => setForm({ ...form, phone: v })}
+                onChange={(v) => setForm({ ...form, phone: formatPhone(v) })}
               />
               <Field
                 label="Responsável"

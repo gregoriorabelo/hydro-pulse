@@ -10,11 +10,13 @@ type Action = {
 
 export default function ActionsMenu({ actions }: { actions: Action[] }) {
   const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
+  const [openUpward, setOpenUpward] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (ref.current && !ref.current.contains(event.target as Node)) {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
         setOpen(false);
       }
     }
@@ -23,11 +25,23 @@ export default function ActionsMenu({ actions }: { actions: Action[] }) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  function toggleOpen() {
+    if (!open && buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      const estimatedMenuHeight = actions.length * 44 + 16;
+
+      setOpenUpward(window.innerHeight - rect.bottom < estimatedMenuHeight);
+    }
+
+    setOpen((value) => !value);
+  }
+
   return (
-    <div className="relative" ref={ref}>
+    <div className="relative" ref={containerRef}>
       <button
+        ref={buttonRef}
         type="button"
-        onClick={() => setOpen((value) => !value)}
+        onClick={toggleOpen}
         className="rounded-xl p-2 text-slate-400 transition hover:bg-white/10 hover:text-white"
         aria-label="Ações"
       >
@@ -35,7 +49,11 @@ export default function ActionsMenu({ actions }: { actions: Action[] }) {
       </button>
 
       {open && (
-        <div className="absolute right-0 z-10 mt-1 w-48 overflow-hidden rounded-2xl border border-white/10 bg-brand-deep shadow-2xl">
+        <div
+          className={`absolute right-0 z-10 w-48 overflow-hidden rounded-2xl border border-white/10 bg-brand-deep shadow-2xl ${
+            openUpward ? "bottom-full mb-1" : "top-full mt-1"
+          }`}
+        >
           {actions.map((action) => (
             <button
               key={action.label}
