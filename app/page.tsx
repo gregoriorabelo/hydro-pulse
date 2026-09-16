@@ -32,7 +32,7 @@ export default function Home() {
           <div className="relative grid gap-8 lg:grid-cols-[1.4fr_0.8fr] lg:items-center">
             <div>
               <div className="mb-7 inline-flex rounded-2xl border border-brand-cyan/30 bg-brand-cyan/10 px-5 py-2 text-sm font-semibold text-brand-cyan">
-                Plataforma Magnacon Gestão Condominial
+                Inteligência hídrica. Decisões em tempo real.
               </div>
 
               <h1 className="text-5xl font-black tracking-tight lg:text-6xl">

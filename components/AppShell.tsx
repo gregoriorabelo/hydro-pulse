@@ -32,10 +32,6 @@ export default function AppShell({ children }: { children: ReactNode }) {
               </span>
             </p>
 
-            <p className="mt-2 text-[10px] uppercase tracking-[0.25em] text-brand-gray">
-              Magnacon Gestão Condominial
-            </p>
-
             <p className="mt-3 text-sm text-slate-400">
               Inteligência hídrica. Decisões em tempo real.
             </p>

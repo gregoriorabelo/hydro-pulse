@@ -49,10 +49,6 @@ export default function LoginPage() {
             </span>
           </h1>
 
-          <p className="mt-2 text-[10px] uppercase tracking-[0.25em] text-brand-gray">
-            Magnacon Gestão Condominial
-          </p>
-
           <p className="mt-4 text-slate-400">
             Entre com sua conta para acessar o painel.
           </p>
