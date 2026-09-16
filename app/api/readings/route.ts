@@ -1,27 +1,12 @@
-import { timingSafeEqual } from "node:crypto";
 import { NextResponse } from "next/server";
 import { sql } from "@/lib/db";
+import { keysMatch } from "@/lib/keyMatch";
 import { getSensorAuth } from "@/services/sensorService";
 import { notifyIfEnteredCritical } from "@/services/notificationService";
 
 type LastReadingRow = {
   water_level: string;
 };
-
-function keysMatch(expectedKey: string, providedKey: string | null): boolean {
-  if (!providedKey) {
-    return false;
-  }
-
-  const expected = Buffer.from(expectedKey);
-  const provided = Buffer.from(providedKey);
-
-  if (expected.length !== provided.length) {
-    return false;
-  }
-
-  return timingSafeEqual(expected, provided);
-}
 
 export async function POST(request: Request) {
   try {
