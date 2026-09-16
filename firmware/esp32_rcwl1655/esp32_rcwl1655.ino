@@ -10,11 +10,11 @@
 
       Echo (5V) ---[ resistor 1kΩ ]---+--- GPIO18 (ECHO_PIN)
                                        |
-                                  [ resistor 2kΩ ]
+                                 [ resistor 1,5kΩ ]
                                        |
                                       GND
 
-    Isso reduz o sinal de 5V para ~3,3V, seguro para o GPIO do ESP32.
+    Isso reduz o sinal de 5V para ~3,0V, seguro para o GPIO do ESP32.
 
   Preencha as constantes abaixo com os dados da sua rede Wi-Fi, do seu
   projeto Hydro Pulse, e do reservatório cadastrado no sistema.

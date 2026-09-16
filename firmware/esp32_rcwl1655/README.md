@@ -5,11 +5,34 @@
 - Um ESP32 (qualquer modelo com Wi-Fi).
 - O sensor RCWL-1655 (ou qualquer sensor ultrassônico compatível com a
   interface Trig/Echo do HC-SR04).
-- Dois resistores para o divisor de tensão do pino Echo (ex.: 1kΩ e 2kΩ) —
+- Dois resistores para o divisor de tensão do pino Echo (1kΩ e 1,5kΩ) —
   veja o comentário no topo do arquivo `.ino` para o esquema de ligação.
 - [Arduino IDE](https://www.arduino.cc/en/software) com o suporte a placas
   ESP32 instalado (Boards Manager → procure "esp32" → instale o pacote da
   Espressif).
+
+## Quando o material chegar
+
+1. **Montar o divisor de tensão** no pino Echo, seguindo o esquema no topo
+   do `.ino`:
+   - Echo (5V) → resistor de 1kΩ → ponto médio (vai para o GPIO18) →
+     resistor de 1,5kΩ → GND.
+   - Esse divisor entrega ~3,0V no GPIO18, seguro para o ESP32.
+2. **Ligar o RCWL-1655 ao ESP32**:
+   - VCC → 5V (ou VIN)
+   - GND → GND
+   - Trig → GPIO5
+   - Echo → ponto médio do divisor (não direto no GPIO18)
+3. **Preencher as constantes** no topo do `.ino` (Wi-Fi, `API_URL`,
+   `SENSOR_API_KEY`, `SENSOR_ID`, profundidade/altura do reservatório) —
+   veja o passo a passo abaixo.
+4. **Gravar o firmware** no ESP32 pelo Arduino IDE e abrir o Monitor Serial
+   para conferir se as leituras e o envio estão OK.
+5. **Conferir no Hydro Pulse** (tela Reservatórios/Painel) se as leituras
+   estão chegando e se o nível calculado bate com a medição real do
+   reservatório.
+6. **Fixar o sensor** no local definitivo (topo do reservatório, apontado
+   para baixo, sem obstruções) só depois de validar tudo em bancada.
 
 ## Passo a passo
 
