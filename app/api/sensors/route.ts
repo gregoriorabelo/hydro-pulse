@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { requireSession } from "@/lib/session";
 import { canWrite, getCondominiumIdForBlock, getCondominiumRole } from "@/lib/access";
+import { logAudit } from "@/lib/audit";
 import { createSensor, listSensorsByCondominium } from "@/services/sensorService";
 import type { SensorInput } from "@/types/entities";
 
@@ -65,6 +66,15 @@ export async function POST(request: NextRequest) {
 
   try {
     const sensor = await createSensor(body);
+
+    await logAudit({
+      session,
+      action: "create",
+      entityType: "sensor",
+      entityId: sensor.id,
+      details: { name: sensor.name, serial: sensor.serial, blockId: body.blockId },
+    });
+
     return NextResponse.json({ sensor }, { status: 201 });
   } catch (error) {
     if (isUniqueViolation(error)) {

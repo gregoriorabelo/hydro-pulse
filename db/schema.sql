@@ -74,6 +74,17 @@ create table if not exists login_attempts (
   updated_at timestamptz not null default now()
 );
 
+create table if not exists audit_log (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid references users(id) on delete set null,
+  user_email text,
+  action text not null,
+  entity_type text not null,
+  entity_id text,
+  details jsonb,
+  created_at timestamptz not null default now()
+);
+
 create table if not exists readings (
   id uuid primary key default gen_random_uuid(),
   reservoir_id uuid not null references reservoirs(id) on delete cascade,
@@ -89,3 +100,4 @@ create index if not exists reservoirs_block_id_idx on reservoirs (block_id);
 create index if not exists sensors_block_id_idx on sensors (block_id);
 create index if not exists readings_reservoir_id_recorded_at_idx
   on readings (reservoir_id, recorded_at desc);
+create index if not exists audit_log_created_at_idx on audit_log (created_at desc);

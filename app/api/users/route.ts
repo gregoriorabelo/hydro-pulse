@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { requireAdmin } from "@/lib/session";
+import { logAudit } from "@/lib/audit";
 import { createUser, listUsers } from "@/services/userService";
 import type { UserInput } from "@/types/entities";
 
@@ -34,6 +35,15 @@ export async function POST(request: NextRequest) {
 
   try {
     const user = await createUser(body);
+
+    await logAudit({
+      session,
+      action: "create",
+      entityType: "user",
+      entityId: user.id,
+      details: { email: user.email, role: user.role },
+    });
+
     return NextResponse.json({ user }, { status: 201 });
   } catch (error) {
     if (

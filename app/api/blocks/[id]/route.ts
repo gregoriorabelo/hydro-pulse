@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { requireSession } from "@/lib/session";
 import { canWrite, getCondominiumIdForBlock, getCondominiumRole } from "@/lib/access";
+import { logAudit } from "@/lib/audit";
 import { deleteBlock, updateBlock } from "@/services/blockService";
 
 type RouteParams = { params: Promise<{ id: string }> };
@@ -39,6 +40,14 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     return NextResponse.json({ error: "Bloco não encontrado" }, { status: 404 });
   }
 
+  await logAudit({
+    session,
+    action: "update",
+    entityType: "block",
+    entityId: id,
+    details: { name: block.name },
+  });
+
   return NextResponse.json({ block });
 }
 
@@ -64,6 +73,8 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
   }
 
   await deleteBlock(id);
+
+  await logAudit({ session, action: "delete", entityType: "block", entityId: id });
 
   return NextResponse.json({ success: true });
 }

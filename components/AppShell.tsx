@@ -15,7 +15,10 @@ const NAV_LINKS_BEFORE_ADMIN = [
   { href: "/relatorios", label: "Relatórios" },
 ];
 
-const ADMIN_NAV_LINKS = [{ href: "/usuarios", label: "Usuários" }];
+const ADMIN_NAV_LINKS = [
+  { href: "/usuarios", label: "Usuários" },
+  { href: "/auditoria", label: "Auditoria" },
+];
 
 const NAV_LINKS_AFTER_ADMIN = [{ href: "/configuracoes", label: "Configurações" }];
 

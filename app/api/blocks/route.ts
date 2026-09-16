@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { requireSession } from "@/lib/session";
 import { canWrite, getCondominiumRole } from "@/lib/access";
+import { logAudit } from "@/lib/audit";
 import { createBlock, listBlocksByCondominium } from "@/services/blockService";
 
 export async function GET(request: NextRequest) {
@@ -52,6 +53,14 @@ export async function POST(request: NextRequest) {
   }
 
   const block = await createBlock(condominiumId, name);
+
+  await logAudit({
+    session,
+    action: "create",
+    entityType: "block",
+    entityId: block.id,
+    details: { name: block.name, condominiumId },
+  });
 
   return NextResponse.json({ block }, { status: 201 });
 }

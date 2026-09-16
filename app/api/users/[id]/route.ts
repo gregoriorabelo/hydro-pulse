@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { requireAdmin } from "@/lib/session";
+import { logAudit } from "@/lib/audit";
 import { deleteUser, updateUser } from "@/services/userService";
 import type { UserInput } from "@/types/entities";
 
@@ -26,6 +27,14 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     if (!user) {
       return NextResponse.json({ error: "Usuário não encontrado" }, { status: 404 });
     }
+
+    await logAudit({
+      session,
+      action: "update",
+      entityType: "user",
+      entityId: id,
+      details: { email: user.email, role: user.role },
+    });
 
     return NextResponse.json({ user });
   } catch (error) {
@@ -62,6 +71,8 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
   }
 
   await deleteUser(id);
+
+  await logAudit({ session, action: "delete", entityType: "user", entityId: id });
 
   return NextResponse.json({ success: true });
 }

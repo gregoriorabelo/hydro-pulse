@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { requireSession } from "@/lib/session";
 import { canWrite, getCondominiumIdForReservoir, getCondominiumRole } from "@/lib/access";
+import { logAudit } from "@/lib/audit";
 import { deleteReservoir, updateReservoir } from "@/services/reservoirService";
 import type { ReservoirInput } from "@/types/entities";
 
@@ -39,6 +40,14 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     return NextResponse.json({ error: "Reservatório não encontrado" }, { status: 404 });
   }
 
+  await logAudit({
+    session,
+    action: "update",
+    entityType: "reservoir",
+    entityId: id,
+    details: { name: reservoir.name },
+  });
+
   return NextResponse.json({ reservoir });
 }
 
@@ -64,6 +73,8 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
   }
 
   await deleteReservoir(id);
+
+  await logAudit({ session, action: "delete", entityType: "reservoir", entityId: id });
 
   return NextResponse.json({ success: true });
 }

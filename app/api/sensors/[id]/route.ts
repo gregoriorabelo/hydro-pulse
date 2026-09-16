@@ -7,6 +7,7 @@ import {
   getCondominiumIdForSensor,
   getCondominiumRole,
 } from "@/lib/access";
+import { logAudit } from "@/lib/audit";
 import { deleteSensor, updateSensor } from "@/services/sensorService";
 import type { SensorInput } from "@/types/entities";
 
@@ -64,6 +65,14 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: "Sensor não encontrado" }, { status: 404 });
     }
 
+    await logAudit({
+      session,
+      action: "update",
+      entityType: "sensor",
+      entityId: id,
+      details: { name: sensor.name, serial: sensor.serial },
+    });
+
     return NextResponse.json({ sensor });
   } catch (error) {
     if (isUniqueViolation(error)) {
@@ -99,6 +108,8 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
   }
 
   await deleteSensor(id);
+
+  await logAudit({ session, action: "delete", entityType: "sensor", entityId: id });
 
   return NextResponse.json({ success: true });
 }

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { requireSession } from "@/lib/session";
+import { logAudit } from "@/lib/audit";
 import { createCondominium, listCondominiums } from "@/services/condominiumService";
 import type { CondominiumInput } from "@/types/entities";
 
@@ -36,6 +37,14 @@ export async function POST(request: NextRequest) {
   }
 
   const condominium = await createCondominium(body);
+
+  await logAudit({
+    session,
+    action: "create",
+    entityType: "condominium",
+    entityId: condominium.id,
+    details: { name: condominium.name },
+  });
 
   return NextResponse.json({ condominium }, { status: 201 });
 }

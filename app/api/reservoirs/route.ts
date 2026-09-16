@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { requireSession } from "@/lib/session";
 import { canWrite, getCondominiumIdForBlock, getCondominiumRole } from "@/lib/access";
+import { logAudit } from "@/lib/audit";
 import { createReservoir, listReservoirsByCondominium } from "@/services/reservoirService";
 import type { ReservoirInput } from "@/types/entities";
 
@@ -59,6 +60,14 @@ export async function POST(request: NextRequest) {
   }
 
   const reservoir = await createReservoir(blockId, data);
+
+  await logAudit({
+    session,
+    action: "create",
+    entityType: "reservoir",
+    entityId: reservoir.id,
+    details: { name: reservoir.name, blockId },
+  });
 
   return NextResponse.json({ reservoir }, { status: 201 });
 }
