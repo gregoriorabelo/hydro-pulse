@@ -8,8 +8,25 @@ type AttemptRow = {
   locked_until: string | null;
 };
 
-function normalizeEmail(email: string) {
+export function normalizeEmail(email: string) {
   return email.trim().toLowerCase();
+}
+
+export function resolveLockStatus(
+  lockedUntilRaw: string | null,
+  now: number = Date.now()
+): { locked: boolean; minutesRemaining: number } {
+  if (!lockedUntilRaw) {
+    return { locked: false, minutesRemaining: 0 };
+  }
+
+  const lockedUntil = new Date(lockedUntilRaw).getTime();
+
+  if (lockedUntil <= now) {
+    return { locked: false, minutesRemaining: 0 };
+  }
+
+  return { locked: true, minutesRemaining: Math.ceil((lockedUntil - now) / 60000) };
 }
 
 export async function getLockStatus(email: string): Promise<{
@@ -20,20 +37,7 @@ export async function getLockStatus(email: string): Promise<{
     select attempts, locked_until from login_attempts where email = ${normalizeEmail(email)}
   `) as AttemptRow[];
 
-  const row = rows[0];
-
-  if (!row?.locked_until) {
-    return { locked: false, minutesRemaining: 0 };
-  }
-
-  const lockedUntil = new Date(row.locked_until).getTime();
-  const now = Date.now();
-
-  if (lockedUntil <= now) {
-    return { locked: false, minutesRemaining: 0 };
-  }
-
-  return { locked: true, minutesRemaining: Math.ceil((lockedUntil - now) / 60000) };
+  return resolveLockStatus(rows[0]?.locked_until ?? null);
 }
 
 export async function recordFailedAttempt(email: string): Promise<void> {

@@ -1,5 +1,6 @@
 import { sql } from "@/lib/db";
-import type { WaterBlock, WaterStatus } from "@/types/block";
+import { calculateAlert, calculateStatus } from "@/lib/reservoirStatus";
+import type { WaterBlock } from "@/types/block";
 
 type ReservoirReadingRow = {
   reservoir_id: string;
@@ -23,35 +24,6 @@ function formatTime(value?: string | null) {
     hour: "2-digit",
     minute: "2-digit",
   });
-}
-
-function calculateStatus(
-  reservoirStatus: "ativo" | "pausado",
-  hasReading: boolean,
-  nivel: number,
-  criticalLevel: number,
-  attentionLevel: number
-): WaterStatus {
-  if (reservoirStatus === "pausado") return "Pausado";
-  if (!hasReading) return "Sem sinal";
-  if (nivel <= criticalLevel) return "Crítico";
-  if (nivel <= attentionLevel) return "Atenção";
-  return "Normal";
-}
-
-function calculateAlert(status: WaterStatus): string {
-  switch (status) {
-    case "Crítico":
-      return "Nível crítico. Ação imediata recomendada.";
-    case "Atenção":
-      return "Nível em faixa de atenção. Acompanhar.";
-    case "Sem sinal":
-      return "Nenhuma leitura recebida do sensor.";
-    case "Pausado":
-      return "Reservatório pausado. Fora do monitoramento ativo.";
-    default:
-      return "Operação dentro do padrão esperado.";
-  }
 }
 
 export async function getBlocks(condominiumId: string): Promise<WaterBlock[]> {
