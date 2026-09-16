@@ -12,6 +12,9 @@ Crie um arquivo `.env.local` (nunca comitado) com:
 | `DATABASE_URL` | String de conexão do banco Postgres (Neon). |
 | `AUTH_SECRET` | Segredo usado para assinar o cookie de sessão. Gere com `openssl rand -hex 32`. |
 | `SENSOR_API_KEY` | Chave exigida no header `x-api-key` para os sensores enviarem leituras via `POST /api/readings`. |
+| `RESEND_API_KEY` | Chave da API do [Resend](https://resend.com), usada para enviar e-mails de redefinição de senha e alertas de nível crítico. Sem ela, esses e-mails simplesmente não são enviados (o resto do app funciona normalmente). |
+| `EMAIL_FROM` | (Opcional) Remetente dos e-mails, ex.: `HydroPulse <naoresponda@seudominio.com.br>`. Sem domínio verificado no Resend, usa o padrão de testes `onboarding@resend.dev` (só entrega para o e-mail da sua própria conta Resend). |
+| `NEXT_PUBLIC_APP_URL` | (Opcional) URL pública do app, usada para montar o link de redefinição de senha no e-mail. Sem ela, usa a URL da própria requisição. |
 
 ## Banco de dados
 

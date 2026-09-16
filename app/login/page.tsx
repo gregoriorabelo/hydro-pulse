@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
@@ -107,6 +108,12 @@ export default function LoginPage() {
           >
             {submitting ? "Entrando..." : "Entrar"}
           </button>
+
+          <p className="text-center text-sm text-slate-400">
+            <Link href="/esqueci-senha" className="text-brand-cyan hover:underline">
+              Esqueci minha senha
+            </Link>
+          </p>
         </form>
       </div>
     </div>

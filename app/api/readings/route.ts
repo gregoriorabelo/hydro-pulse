@@ -1,9 +1,14 @@
 import { timingSafeEqual } from "node:crypto";
 import { NextResponse } from "next/server";
 import { sql } from "@/lib/db";
+import { notifyIfEnteredCritical } from "@/services/notificationService";
 
 type SensorRow = {
   reservoir_id: string | null;
+};
+
+type LastReadingRow = {
+  water_level: string;
 };
 
 function isAuthorized(request: Request) {
@@ -89,10 +94,23 @@ export async function POST(request: Request) {
       );
     }
 
+    const previousReadingRows = (await sql`
+      select water_level from readings
+      where reservoir_id = ${sensor.reservoir_id}
+      order by recorded_at desc
+      limit 1
+    `) as LastReadingRow[];
+
+    const previousLevel = previousReadingRows[0]
+      ? Number(previousReadingRows[0].water_level)
+      : null;
+
     await sql`
       insert into readings (reservoir_id, water_level, depth_cm)
       values (${sensor.reservoir_id}, ${water_level}, ${depth_cm ?? null})
     `;
+
+    await notifyIfEnteredCritical(sensor.reservoir_id, Number(water_level), previousLevel);
 
     return NextResponse.json({
       success: true,
