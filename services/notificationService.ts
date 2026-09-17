@@ -1,5 +1,6 @@
 import { sql } from "@/lib/db";
 import { sendEmail } from "@/lib/email";
+import { sendCriticalAlertWhatsApp } from "@/lib/whatsapp";
 import { calculateStatus } from "@/lib/reservoirStatus";
 
 type ReservoirRow = {
@@ -14,6 +15,7 @@ type ReservoirRow = {
 };
 
 type RecipientRow = { email: string };
+type ContactRow = { phone_number: string };
 
 export async function notifyIfEnteredCritical(
   reservoirId: string,
@@ -66,8 +68,13 @@ export async function notifyIfEnteredCritical(
         and uc.role in ('admin', 'sindico', 'operador')
     `) as RecipientRow[];
 
-    await Promise.all(
-      recipients.map((recipient) =>
+    const contacts = (await sql`
+      select phone_number from condominium_contacts
+      where condominium_id = ${reservoir.condominium_id}
+    `) as ContactRow[];
+
+    await Promise.all([
+      ...recipients.map((recipient) =>
         sendEmail({
           to: recipient.email,
           subject: `Nível crítico — ${reservoir.name} (${reservoir.condominium_name})`,
@@ -78,8 +85,17 @@ export async function notifyIfEnteredCritical(
             <p>Acesse o HydroPulse para mais detalhes.</p>
           `,
         })
-      )
-    );
+      ),
+      ...contacts.map((contact) =>
+        sendCriticalAlertWhatsApp({
+          to: contact.phone_number,
+          reservoirName: reservoir.name,
+          blockName: reservoir.block_name,
+          levelPercent: newLevel,
+          criticalLevelPercent: criticalLevel,
+        })
+      ),
+    ]);
   } catch (error) {
     console.error("Falha ao notificar nível crítico:", error);
   }

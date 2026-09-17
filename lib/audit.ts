@@ -7,7 +7,8 @@ export type AuditEntityType =
   | "block"
   | "reservoir"
   | "sensor"
-  | "user";
+  | "user"
+  | "contact";
 
 export async function logAudit(params: {
   session: SessionPayload;

@@ -17,6 +17,9 @@ Crie um arquivo `.env.local` (nunca comitado) com:
 | `NEXT_PUBLIC_SENTRY_DSN` | DSN do projeto no [Sentry](https://sentry.io), usado para capturar erros em produção (cliente e servidor). Sem ela, o Sentry fica desativado e o resto do app funciona normalmente. |
 | `SENTRY_ORG` / `SENTRY_PROJECT` | (Opcional) Slugs da organização e do projeto no Sentry, usados só durante o build pra enviar source maps (facilita ler stack traces de código minificado). |
 | `SENTRY_AUTH_TOKEN` | (Opcional, sensível) Token do Sentry para o build enviar os source maps. Sem ele, os erros continuam sendo capturados normalmente — só o stack trace fica menos legível. Gere em Sentry → Settings → Auth Tokens, com o escopo `project:releases`. |
+| `WHATSAPP_ACCESS_TOKEN` | Token de acesso da [Meta Cloud API](https://developers.facebook.com) (WhatsApp Business), usado para enviar alerta de nível crítico aos contatos cadastrados em cada condomínio. Sem ele, o alerta por WhatsApp é simplesmente pulado (e-mail continua funcionando normalmente). |
+| `WHATSAPP_PHONE_NUMBER_ID` | ID do número de telefone do WhatsApp Business (aparece em WhatsApp → API Setup no painel do Meta for Developers). |
+| `WHATSAPP_TEMPLATE_NAME` / `WHATSAPP_TEMPLATE_LANG` | (Opcional) Nome e idioma do template aprovado no WhatsApp Manager usado para o alerta. Padrão: `alerta_critico` / `pt_BR`. |
 
 ## Banco de dados
 

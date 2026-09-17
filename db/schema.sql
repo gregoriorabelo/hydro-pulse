@@ -93,6 +93,14 @@ create table if not exists audit_log (
   created_at timestamptz not null default now()
 );
 
+create table if not exists condominium_contacts (
+  id uuid primary key default gen_random_uuid(),
+  condominium_id uuid not null references condominiums(id) on delete cascade,
+  name text not null,
+  phone_number text not null,
+  created_at timestamptz not null default now()
+);
+
 create table if not exists readings (
   id uuid primary key default gen_random_uuid(),
   reservoir_id uuid not null references reservoirs(id) on delete cascade,
@@ -109,3 +117,5 @@ create index if not exists sensors_block_id_idx on sensors (block_id);
 create index if not exists readings_reservoir_id_recorded_at_idx
   on readings (reservoir_id, recorded_at desc);
 create index if not exists audit_log_created_at_idx on audit_log (created_at desc);
+create index if not exists condominium_contacts_condominium_id_idx
+  on condominium_contacts (condominium_id);

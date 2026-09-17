@@ -115,3 +115,16 @@ export type UserInput = {
   role: GlobalRole;
   condominiums: { condominiumId: string; role: CondominiumRole }[];
 };
+
+export type CondominiumContact = {
+  id: string;
+  condominiumId: string;
+  name: string;
+  phoneNumber: string;
+  createdAt: string;
+};
+
+export type CondominiumContactInput = {
+  name: string;
+  phoneNumber: string;
+};

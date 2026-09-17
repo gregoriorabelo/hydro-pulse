@@ -50,3 +50,11 @@ export async function getCondominiumIdForSensor(sensorId: string): Promise<strin
 
   return rows[0]?.condominium_id ?? null;
 }
+
+export async function getCondominiumIdForContact(contactId: string): Promise<string | null> {
+  const rows = (await sql`
+    select condominium_id from condominium_contacts where id = ${contactId}
+  `) as { condominium_id: string }[];
+
+  return rows[0]?.condominium_id ?? null;
+}

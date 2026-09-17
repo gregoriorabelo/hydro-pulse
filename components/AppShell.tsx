@@ -12,6 +12,7 @@ const NAV_LINKS_BEFORE_ADMIN = [
   { href: "/blocos", label: "Blocos" },
   { href: "/reservatorios", label: "Reservatórios" },
   { href: "/sensores", label: "Sensores" },
+  { href: "/contatos", label: "Contatos" },
   { href: "/relatorios", label: "Relatórios" },
 ];
 
