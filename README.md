@@ -3,6 +3,28 @@
 Monitoramento hídrico inteligente para condomínios, com visão operacional,
 alertas preventivos e inteligência gerencial.
 
+## Pendências em aberto
+
+- [ ] **Rodar `db/migration_008_condominium_contacts.sql` no Neon** — cria a
+      tabela de contatos de WhatsApp por condomínio. Sem ela, a tela
+      Contatos e o envio de alerta por WhatsApp não funcionam.
+- [ ] **Concluir o cadastro no Meta for Developers** — travado numa
+      verificação de segurança do próprio Meta ("dispositivo diferente do
+      habitual"). Tentar de novo mais tarde, ou pelo navegador que você já
+      usa pra Facebook/Instagram.
+- [ ] **Criar o app WhatsApp Business no Meta for Developers**, pegar o
+      **Phone Number ID** e um **Access Token**, e configurar
+      `WHATSAPP_ACCESS_TOKEN` / `WHATSAPP_PHONE_NUMBER_ID` na Vercel.
+- [ ] **Criar e aprovar o template `alerta_critico`** no WhatsApp Manager
+      (categoria Utility, português BR) — sem ele, a Meta rejeita o envio
+      mesmo com token e phone number configurados.
+- [ ] **Testar o alerta por WhatsApp de ponta a ponta** (mesmo truque do
+      e-mail: duas leituras via `curl` em `/api/readings`, uma normal e uma
+      abaixo do nível crítico, pra forçar a transição).
+- [ ] **Hardware físico** (ESP32 + RCWL-1655 + resistores 1kΩ/1,5kΩ) —
+      aguardando chegar. Checklist completo em
+      [`firmware/esp32_rcwl1655/README.md`](./firmware/esp32_rcwl1655/README.md).
+
 ## Variáveis de ambiente
 
 Crie um arquivo `.env.local` (nunca comitado) com:
