@@ -1,6 +1,25 @@
 import type { NextConfig } from "next";
 import { withSentryConfig } from "@sentry/nextjs/config";
 
+// Tudo que o app carrega é do próprio domínio (imagens em /public, fonte via
+// next/font que é auto-hospedada) — a única chamada externa do navegador é o
+// beacon de erros do Sentry. 'unsafe-inline' fica em script-src e style-src
+// porque o Next.js injeta scripts de hidratação e o Tailwind pode gerar
+// estilos inline; sem poder testar direto no domínio de produção, prefiro
+// isso a arriscar travar o app inteiro com uma CSP estrita demais.
+const CSP = [
+  "default-src 'self'",
+  "script-src 'self' 'unsafe-inline'",
+  "style-src 'self' 'unsafe-inline'",
+  "img-src 'self' data:",
+  "font-src 'self'",
+  "connect-src 'self' https://*.sentry.io https://*.ingest.sentry.io https://*.ingest.us.sentry.io",
+  "object-src 'none'",
+  "base-uri 'self'",
+  "form-action 'self'",
+  "frame-ancestors 'none'",
+].join("; ");
+
 const nextConfig: NextConfig = {
   async headers() {
     return [
@@ -17,6 +36,7 @@ const nextConfig: NextConfig = {
             key: "Permissions-Policy",
             value: "camera=(), microphone=(), geolocation=()",
           },
+          { key: "Content-Security-Policy", value: CSP },
         ],
       },
     ];
