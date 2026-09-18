@@ -5,7 +5,7 @@ alertas preventivos e inteligência gerencial.
 
 ## Pendências em aberto
 
-- [ ] **Rodar `db/migration_008_condominium_contacts.sql` no Neon** — cria a
+- [x] **Rodar `db/migration_008_condominium_contacts.sql` no Neon** — cria a
       tabela de contatos de WhatsApp por condomínio. Sem ela, a tela
       Contatos e o envio de alerta por WhatsApp não funcionam.
 - [ ] **Concluir o cadastro no Meta for Developers** — travado numa
