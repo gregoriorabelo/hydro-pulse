@@ -2,11 +2,14 @@
 
 ## O que você precisa
 
-- Um ESP32 (qualquer modelo com Wi-Fi).
+- Um ESP32 (qualquer modelo com Wi-Fi). Se for uma variante com antena
+  externa (conector IPEX), lembre de encaixar a antena antes de testar —
+  sem ela o Wi-Fi não funciona.
 - O sensor RCWL-1655 (ou qualquer sensor ultrassônico compatível com a
   interface Trig/Echo do HC-SR04).
-- Dois resistores para o divisor de tensão do pino Echo (1kΩ e 1,5kΩ) —
-  veja o comentário no topo do arquivo `.ino` para o esquema de ligação.
+- Dois resistores para o divisor de tensão do pino Echo (1kΩ e 1,5kΩ, ou
+  dois de 1,5kΩ se for mais fácil de achar) — veja o comentário no topo do
+  arquivo `.ino` para o esquema de ligação.
 - [Arduino IDE](https://www.arduino.cc/en/software) com o suporte a placas
   ESP32 instalado (Boards Manager → procure "esp32" → instale o pacote da
   Espressif).
@@ -18,6 +21,8 @@
    - Echo (5V) → resistor de 1kΩ → ponto médio (vai para o GPIO18) →
      resistor de 1,5kΩ → GND.
    - Esse divisor entrega ~3,0V no GPIO18, seguro para o ESP32.
+   - Alternativa com dois resistores de 1,5kΩ: entrega ~2,5V, também
+     seguro.
 2. **Ligar o RCWL-1655 ao ESP32**:
    - VCC → 5V (ou VIN)
    - GND → GND

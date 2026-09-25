@@ -16,6 +16,10 @@
 
     Isso reduz o sinal de 5V para ~3,0V, seguro para o GPIO do ESP32.
 
+    Alternativa (se só tiver resistores de 1,5kΩ em mãos): use dois de
+    1,5kΩ em série no lugar do par 1kΩ+1,5kΩ. A tensão no GPIO18 fica em
+    ~2,5V — ainda segura, só um pouco mais conservadora.
+
   Preencha as constantes abaixo com os dados da sua rede Wi-Fi, do seu
   projeto Hydro Pulse, e do reservatório cadastrado no sistema.
 */
