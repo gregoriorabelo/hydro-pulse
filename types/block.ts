@@ -4,7 +4,8 @@ export type WaterStatus =
   | "Crítico"
   | "Sem sinal"
   | "Pausado"
-  | "Reabastecendo";
+  | "Reabastecendo"
+  | "Transbordamento";
 
 export type WaterTrend =
   | "Subindo"
