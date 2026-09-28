@@ -5,11 +5,15 @@ import { withSentryConfig } from "@sentry/nextjs/config";
 // next/font que é auto-hospedada) — a única chamada externa do navegador é o
 // beacon de erros do Sentry. 'unsafe-inline' fica em script-src e style-src
 // porque o Next.js injeta scripts de hidratação e o Tailwind pode gerar
-// estilos inline; sem poder testar direto no domínio de produção, prefiro
-// isso a arriscar travar o app inteiro com uma CSP estrita demais.
+// estilos inline.
+//
+// Em desenvolvimento, o React/Next usa eval() para recursos de debugging.
+// Liberamos 'unsafe-eval' somente nesse ambiente; produção continua sem ele.
+const isDevelopment = process.env.NODE_ENV === "development";
+
 const CSP = [
   "default-src 'self'",
-  "script-src 'self' 'unsafe-inline'",
+  `script-src 'self' 'unsafe-inline'${isDevelopment ? " 'unsafe-eval'" : ""}`,
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data:",
   "font-src 'self'",
