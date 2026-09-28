@@ -21,6 +21,7 @@ function getStatusStyle(status: WaterStatus) {
     "Sem sinal": "border-slate-500/20 bg-slate-500/10 text-slate-300",
     Pausado: "border-slate-500/20 bg-slate-500/10 text-slate-400",
     Reabastecendo: "border-brand-tech/20 bg-brand-tech/10 text-brand-cyan",
+    Transbordamento: "border-orange-500/20 bg-orange-500/10 text-orange-300",
   };
 
   return styles[status];
