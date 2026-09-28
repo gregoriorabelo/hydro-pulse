@@ -5,25 +5,28 @@ import { useWaterMonitoring } from "@/hooks/useWaterMonitoring";
 import { useCondominiumContext } from "@/lib/condominium-context";
 import type { WaterBlock, WaterStatus } from "@/types/block";
 
-type Severity = "Crítico" | "Atenção" | "Sem sinal";
+type Severity = "Crítico" | "Atenção" | "Transbordamento" | "Sem sinal";
 
-const SEVERITY_STATUSES: Severity[] = ["Crítico", "Atenção", "Sem sinal"];
+const SEVERITY_STATUSES: Severity[] = ["Crítico", "Atenção", "Transbordamento", "Sem sinal"];
 
 const FILTERS: { label: string; value: Severity | "Todos" }[] = [
   { label: "Todos", value: "Todos" },
   { label: "Crítico", value: "Crítico" },
   { label: "Atenção", value: "Atenção" },
+  { label: "Transbordamento", value: "Transbordamento" },
   { label: "Sem sinal", value: "Sem sinal" },
 ];
 
 function severityStyle(status: WaterStatus) {
   if (status === "Crítico") return "border-red-500/20 bg-red-500/10";
+  if (status === "Transbordamento") return "border-orange-500/20 bg-orange-500/10";
   if (status === "Sem sinal") return "border-slate-500/20 bg-slate-500/10";
   return "border-yellow-500/20 bg-yellow-500/10";
 }
 
 function severityBadge(status: WaterStatus) {
   if (status === "Crítico") return "bg-red-500/20 text-red-300";
+  if (status === "Transbordamento") return "bg-orange-500/20 text-orange-300";
   if (status === "Sem sinal") return "bg-slate-500/20 text-slate-300";
   return "bg-yellow-500/20 text-yellow-300";
 }
@@ -45,7 +48,7 @@ export default function AlertasPage() {
       acc[severity] = alerts.filter((block) => block.status === severity).length;
       return acc;
     },
-    { Crítico: 0, Atenção: 0, "Sem sinal": 0 }
+    { Crítico: 0, Atenção: 0, Transbordamento: 0, "Sem sinal": 0 }
   );
 
   if (!loadingCondominiums && condominiums.length === 0) {
@@ -68,7 +71,7 @@ export default function AlertasPage() {
         </div>
       </div>
 
-      <div className="grid gap-5 sm:grid-cols-3">
+      <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
         <div className="rounded-[1.7rem] border border-red-500/20 bg-red-500/10 p-6">
           <p className="text-slate-300">Crítico</p>
           <h3 className="mt-3 text-4xl font-black text-red-300">{counts["Crítico"]}</h3>
@@ -76,6 +79,10 @@ export default function AlertasPage() {
         <div className="rounded-[1.7rem] border border-yellow-500/20 bg-yellow-500/10 p-6">
           <p className="text-slate-300">Atenção</p>
           <h3 className="mt-3 text-4xl font-black text-yellow-300">{counts["Atenção"]}</h3>
+        </div>
+        <div className="rounded-[1.7rem] border border-orange-500/20 bg-orange-500/10 p-6">
+          <p className="text-slate-300">Transbordamento</p>
+          <h3 className="mt-3 text-4xl font-black text-orange-300">{counts["Transbordamento"]}</h3>
         </div>
         <div className="rounded-[1.7rem] border border-slate-500/20 bg-slate-500/10 p-6">
           <p className="text-slate-300">Sem sinal</p>

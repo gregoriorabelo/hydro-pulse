@@ -12,6 +12,7 @@ type Row = {
   min_operational_volume_liters: string | null;
   critical_level_percent: string;
   attention_level_percent: string;
+  high_level_percent: string;
   reading_interval_minutes: string | null;
   expected_autonomy_hours: string | null;
   status: ReservoirStatus;
@@ -34,6 +35,7 @@ function mapRow(row: Row): Reservoir {
     minOperationalVolumeLiters: toNumber(row.min_operational_volume_liters),
     criticalLevelPercent: Number(row.critical_level_percent),
     attentionLevelPercent: Number(row.attention_level_percent),
+    highLevelPercent: Number(row.high_level_percent),
     readingIntervalMinutes: toNumber(row.reading_interval_minutes),
     expectedAutonomyHours: toNumber(row.expected_autonomy_hours),
     status: row.status,
@@ -63,13 +65,13 @@ export async function createReservoir(
     insert into reservoirs (
       block_id, name, type, capacity_liters, total_depth_cm, useful_height_cm,
       min_operational_volume_liters, critical_level_percent, attention_level_percent,
-      reading_interval_minutes, expected_autonomy_hours
+      high_level_percent, reading_interval_minutes, expected_autonomy_hours
     ) values (
       ${blockId}, ${data.name}, ${data.type},
       ${data.capacityLiters ?? null}, ${data.totalDepthCm ?? null}, ${data.usefulHeightCm ?? null},
       ${data.minOperationalVolumeLiters ?? null},
-      ${data.criticalLevelPercent ?? 35}, ${data.attentionLevelPercent ?? 60},
-      ${data.readingIntervalMinutes ?? null}, ${data.expectedAutonomyHours ?? null}
+      ${data.criticalLevelPercent ?? 30}, ${data.attentionLevelPercent ?? 60},
+      ${data.highLevelPercent ?? 95}, ${data.readingIntervalMinutes ?? null}, ${data.expectedAutonomyHours ?? null}
     )
     returning *
   `) as Row[];
@@ -89,8 +91,9 @@ export async function updateReservoir(
       total_depth_cm = ${data.totalDepthCm ?? null},
       useful_height_cm = ${data.usefulHeightCm ?? null},
       min_operational_volume_liters = ${data.minOperationalVolumeLiters ?? null},
-      critical_level_percent = ${data.criticalLevelPercent ?? 35},
+      critical_level_percent = ${data.criticalLevelPercent ?? 30},
       attention_level_percent = ${data.attentionLevelPercent ?? 60},
+      high_level_percent = ${data.highLevelPercent ?? 95},
       reading_interval_minutes = ${data.readingIntervalMinutes ?? null},
       expected_autonomy_hours = ${data.expectedAutonomyHours ?? null}
     where id = ${id}

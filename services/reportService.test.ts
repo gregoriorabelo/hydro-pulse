@@ -29,6 +29,7 @@ describe("getNiveisReport", () => {
         reservoir_status: "ativo",
         critical_level_percent: "35",
         attention_level_percent: "60",
+        high_level_percent: "95",
         capacity_liters: "5000",
         water_level: "80",
         depth_cm: "150",
@@ -41,6 +42,7 @@ describe("getNiveisReport", () => {
         reservoir_status: "ativo",
         critical_level_percent: "35",
         attention_level_percent: "60",
+        high_level_percent: "95",
         capacity_liters: "5000",
         water_level: "78",
         depth_cm: "148",
@@ -55,6 +57,7 @@ describe("getNiveisReport", () => {
     expect(report!.reservoirs[0].readings).toHaveLength(2);
     expect(report!.reservoirs[0].capacityLiters).toBe(5000);
     expect(report!.reservoirs[0].criticalLevelPercent).toBe(35);
+    expect(report!.reservoirs[0].highLevelPercent).toBe(95);
   });
 
   it("keeps a reservoir with zero readings in the period (empty readings array)", async () => {
@@ -67,6 +70,7 @@ describe("getNiveisReport", () => {
         reservoir_status: "pausado",
         critical_level_percent: "20",
         attention_level_percent: "40",
+        high_level_percent: "95",
         capacity_liters: null,
         water_level: null,
         depth_cm: null,
@@ -91,6 +95,7 @@ describe("getNiveisReport", () => {
         reservoir_status: "ativo",
         critical_level_percent: "35",
         attention_level_percent: "60",
+        high_level_percent: "95",
         capacity_liters: null,
         water_level: null,
         depth_cm: null,
@@ -103,6 +108,7 @@ describe("getNiveisReport", () => {
         reservoir_status: "ativo",
         critical_level_percent: "35",
         attention_level_percent: "60",
+        high_level_percent: "95",
         capacity_liters: null,
         water_level: null,
         depth_cm: null,

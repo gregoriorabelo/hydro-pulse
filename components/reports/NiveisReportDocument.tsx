@@ -184,6 +184,10 @@ export default function NiveisReportDocument({ report }: { report: NiveisReport 
                 {reservoir.attentionLevelPercent}%
               </Text>
               <Text style={styles.summaryItem}>
+                <Text style={styles.summaryLabel}>Limite alto: </Text>
+                {reservoir.highLevelPercent}%
+              </Text>
+              <Text style={styles.summaryItem}>
                 <Text style={styles.summaryLabel}>Capacidade: </Text>
                 {reservoir.capacityLiters ? `${reservoir.capacityLiters} L` : "—"}
               </Text>

@@ -8,6 +8,7 @@ type ReservoirReadingRow = {
   reservoir_status: "ativo" | "pausado";
   critical_level_percent: string;
   attention_level_percent: string;
+  high_level_percent: string;
   expected_autonomy_hours: string | null;
   block_name: string;
   water_level: string | null;
@@ -34,6 +35,7 @@ export async function getBlocks(condominiumId: string): Promise<WaterBlock[]> {
       r.status as reservoir_status,
       r.critical_level_percent,
       r.attention_level_percent,
+      r.high_level_percent,
       r.expected_autonomy_hours,
       b.name as block_name,
       readings.water_level,
@@ -73,13 +75,15 @@ export async function getBlocks(condominiumId: string): Promise<WaterBlock[]> {
     const profundidade = Number(lastReading?.depth_cm ?? 0);
     const criticalLevel = Number(row.critical_level_percent);
     const attentionLevel = Number(row.attention_level_percent);
+    const highLevel = Number(row.high_level_percent);
 
     const status = calculateStatus(
       row.reservoir_status,
       Boolean(lastReading),
       nivel,
       criticalLevel,
-      attentionLevel
+      attentionLevel,
+      highLevel
     );
 
     const autonomia = row.expected_autonomy_hours

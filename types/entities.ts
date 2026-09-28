@@ -45,6 +45,7 @@ export type Reservoir = {
   minOperationalVolumeLiters: number | null;
   criticalLevelPercent: number;
   attentionLevelPercent: number;
+  highLevelPercent: number;
   readingIntervalMinutes: number | null;
   expectedAutonomyHours: number | null;
   status: ReservoirStatus;
@@ -60,6 +61,7 @@ export type ReservoirInput = {
   minOperationalVolumeLiters?: number | null;
   criticalLevelPercent?: number;
   attentionLevelPercent?: number;
+  highLevelPercent?: number;
   readingIntervalMinutes?: number | null;
   expectedAutonomyHours?: number | null;
 };

@@ -10,7 +10,7 @@ import { useCondominiumContext } from "@/lib/condominium-context";
 
 function getAverageLevel(blocks: { nivel: number; status: string }[]) {
   const withValidReading = blocks.filter(
-    (block) => block.status === "Normal" || block.status === "Atenção" || block.status === "Crítico"
+    (block) => block.status === "Normal" || block.status === "Atenção" || block.status === "Crítico" || block.status === "Transbordamento"
   );
 
   if (withValidReading.length === 0) return 0;
@@ -27,7 +27,7 @@ export default function Home() {
   const activeCondominium = condominiums.find((c) => c.id === activeCondominiumId);
   const averageLevel = getAverageLevel(blocks);
   const activeAlerts = blocks.filter(
-    (block) => block.status === "Crítico" || block.status === "Atenção" || block.status === "Sem sinal"
+    (block) => block.status === "Crítico" || block.status === "Atenção" || block.status === "Transbordamento" || block.status === "Sem sinal"
   ).length;
   const sensorsOnline = blocks.filter(
     (block) => block.status !== "Sem sinal" && block.status !== "Pausado"

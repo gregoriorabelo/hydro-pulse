@@ -7,7 +7,7 @@ const notifyMock = vi.fn();
 vi.mock("@/lib/db", () => ({ sql: sqlMock }));
 vi.mock("@/services/sensorService", () => ({ getSensorAuth: getSensorAuthMock }));
 vi.mock("@/services/notificationService", () => ({
-  notifyIfEnteredCritical: notifyMock,
+  notifyIfEnteredAlertState: notifyMock,
 }));
 
 const { POST } = await import("./route");

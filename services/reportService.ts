@@ -13,6 +13,7 @@ export type ReportReservoir = {
   status: "ativo" | "pausado";
   criticalLevelPercent: number;
   attentionLevelPercent: number;
+  highLevelPercent: number;
   capacityLiters: number | null;
   readings: ReportReading[];
 };
@@ -31,6 +32,7 @@ type Row = {
   reservoir_status: "ativo" | "pausado";
   critical_level_percent: string;
   attention_level_percent: string;
+  high_level_percent: string;
   capacity_liters: string | null;
   water_level: string | null;
   depth_cm: string | null;
@@ -58,6 +60,7 @@ export async function getNiveisReport(
       r.status as reservoir_status,
       r.critical_level_percent,
       r.attention_level_percent,
+      r.high_level_percent,
       r.capacity_liters,
       rd.water_level,
       rd.depth_cm,
@@ -85,6 +88,7 @@ export async function getNiveisReport(
         status: row.reservoir_status,
         criticalLevelPercent: Number(row.critical_level_percent),
         attentionLevelPercent: Number(row.attention_level_percent),
+        highLevelPercent: Number(row.high_level_percent),
         capacityLiters: row.capacity_liters ? Number(row.capacity_liters) : null,
         readings: [],
       } satisfies ReportReservoir);

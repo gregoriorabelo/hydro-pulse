@@ -16,6 +16,14 @@ function generateAlerts(blocks: WaterBlock[]) {
       });
     }
 
+    if (block.status === "Transbordamento") {
+      alerts.push({
+        tipo: "Risco de transbordamento",
+        severidade: "Transbordamento",
+        mensagem: `${block.id} (bloco ${block.blockName}) acima do limite máximo configurado.`,
+      });
+    }
+
     if (block.status === "Crítico") {
       alerts.push({
         tipo: "Baixo nível",
@@ -39,6 +47,10 @@ function generateAlerts(blocks: WaterBlock[]) {
 function getAlertStyle(severidade: string) {
   if (severidade === "Crítico") {
     return "border-red-500/20 bg-red-500/10";
+  }
+
+  if (severidade === "Transbordamento") {
+    return "border-orange-500/20 bg-orange-500/10";
   }
 
   return "border-yellow-500/20 bg-yellow-500/10";

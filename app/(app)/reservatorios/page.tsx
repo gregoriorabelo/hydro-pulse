@@ -16,8 +16,9 @@ const EMPTY_FORM: ReservoirInput = {
   totalDepthCm: null,
   usefulHeightCm: null,
   minOperationalVolumeLiters: null,
-  criticalLevelPercent: 35,
+  criticalLevelPercent: 30,
   attentionLevelPercent: 60,
+  highLevelPercent: 95,
   readingIntervalMinutes: null,
   expectedAutonomyHours: null,
 };
@@ -72,6 +73,7 @@ export default function ReservatoriosPage() {
       minOperationalVolumeLiters: reservoir.minOperationalVolumeLiters,
       criticalLevelPercent: reservoir.criticalLevelPercent,
       attentionLevelPercent: reservoir.attentionLevelPercent,
+      highLevelPercent: reservoir.highLevelPercent,
       readingIntervalMinutes: reservoir.readingIntervalMinutes,
       expectedAutonomyHours: reservoir.expectedAutonomyHours,
     });
@@ -173,7 +175,7 @@ export default function ReservatoriosPage() {
                   <th className="px-6 py-4 font-medium">Bloco</th>
                   <th className="px-6 py-4 font-medium">Tipo</th>
                   <th className="px-6 py-4 font-medium">Capacidade</th>
-                  <th className="px-6 py-4 font-medium">Crítico / Atenção</th>
+                  <th className="px-6 py-4 font-medium">Crítico / Atenção / Alto</th>
                   <th className="px-6 py-4 font-medium">Status</th>
                   <th className="px-6 py-4"></th>
                 </tr>
@@ -191,7 +193,7 @@ export default function ReservatoriosPage() {
                         : "—"}
                     </td>
                     <td className="px-6 py-4 text-slate-300">
-                      {reservoir.criticalLevelPercent}% / {reservoir.attentionLevelPercent}%
+                      {reservoir.criticalLevelPercent}% / {reservoir.attentionLevelPercent}% / {reservoir.highLevelPercent}%
                     </td>
                     <td className="px-6 py-4">
                       <span
@@ -290,16 +292,21 @@ export default function ReservatoriosPage() {
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid gap-4 md:grid-cols-3">
               <NumberField
-                label="Nível crítico (%)"
+                label="Nível crítico / baixo (%)"
                 value={form.criticalLevelPercent}
-                onChange={(v) => setForm({ ...form, criticalLevelPercent: v ?? 35 })}
+                onChange={(v) => setForm({ ...form, criticalLevelPercent: v ?? 30 })}
               />
               <NumberField
                 label="Nível de atenção (%)"
                 value={form.attentionLevelPercent}
                 onChange={(v) => setForm({ ...form, attentionLevelPercent: v ?? 60 })}
+              />
+              <NumberField
+                label="Risco de transbordamento (%)"
+                value={form.highLevelPercent}
+                onChange={(v) => setForm({ ...form, highLevelPercent: v ?? 95 })}
               />
             </div>
 
