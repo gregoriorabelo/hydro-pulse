@@ -25,7 +25,7 @@ export interface WaterBlock {
   id: string;
   blockName: string;
   nivel: number;
-  profundidade: number;
+  profundidade: number | null;
   status: WaterStatus;
   tendencia: WaterTrend;
   autonomia: string;
