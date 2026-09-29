@@ -61,7 +61,7 @@ export default function BlockCard({ block }: BlockCardProps) {
           <p className="text-slate-400">Profundidade</p>
 
           <h4 className="mt-4 text-5xl font-black text-white">
-            {block.profundidade} cm
+            {block.profundidade !== null ? `${block.profundidade} cm` : "—"}
           </h4>
         </div>
       </div>

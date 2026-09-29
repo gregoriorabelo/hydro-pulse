@@ -72,7 +72,7 @@ export async function getBlocks(condominiumId: string): Promise<WaterBlock[]> {
   return Array.from(byReservoir.values()).map(({ row, readings }) => {
     const lastReading = readings[0];
     const nivel = Number(lastReading?.water_level ?? 0);
-    const profundidade = Number(lastReading?.depth_cm ?? 0);
+    const profundidade = lastReading?.depth_cm == null ? null : Number(lastReading.depth_cm);
     const criticalLevel = Number(row.critical_level_percent);
     const attentionLevel = Number(row.attention_level_percent);
     const highLevel = Number(row.high_level_percent);
