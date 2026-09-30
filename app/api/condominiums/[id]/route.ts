@@ -14,8 +14,8 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
   }
 
-  if (session.role !== "admin") {
-    return NextResponse.json({ error: "Apenas administradores podem editar condomínios" }, { status: 403 });
+  if (session.role !== "master") {
+    return NextResponse.json({ error: "Apenas a conta master pode editar condomínios" }, { status: 403 });
   }
 
   const { id } = await params;
@@ -49,8 +49,8 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
   }
 
-  if (session.role !== "admin") {
-    return NextResponse.json({ error: "Apenas administradores podem excluir condomínios" }, { status: 403 });
+  if (session.role !== "master") {
+    return NextResponse.json({ error: "Apenas a conta master pode excluir condomínios" }, { status: 403 });
   }
 
   const { id } = await params;

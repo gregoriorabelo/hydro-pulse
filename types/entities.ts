@@ -85,7 +85,7 @@ export type SensorInput = {
   model?: string | null;
 };
 
-export type GlobalRole = "admin" | "operador";
+export type GlobalRole = "master" | "operador";
 export type CondominiumRole = "admin" | "sindico" | "operador" | "visualizador";
 
 export const CONDOMINIUM_ROLE_LABELS: Record<CondominiumRole, string> = {

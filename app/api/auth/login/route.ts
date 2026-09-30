@@ -8,7 +8,7 @@ type UserRow = {
   id: string;
   email: string;
   password_hash: string;
-  role: "admin" | "operador";
+  role: "master" | "operador";
 };
 
 export async function POST(request: Request) {

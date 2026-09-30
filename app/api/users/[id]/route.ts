@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { requireAdmin } from "@/lib/session";
+import { requireMaster } from "@/lib/session";
 import { logAudit } from "@/lib/audit";
 import { deleteUser, updateUser } from "@/services/userService";
 import type { UserInput } from "@/types/entities";
@@ -8,7 +8,7 @@ import type { UserInput } from "@/types/entities";
 type RouteParams = { params: Promise<{ id: string }> };
 
 export async function PATCH(request: NextRequest, { params }: RouteParams) {
-  const session = await requireAdmin(request);
+  const session = await requireMaster(request);
 
   if (!session) {
     return NextResponse.json({ error: "Não autorizado" }, { status: 403 });
@@ -55,7 +55,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
 }
 
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
-  const session = await requireAdmin(request);
+  const session = await requireMaster(request);
 
   if (!session) {
     return NextResponse.json({ error: "Não autorizado" }, { status: 403 });

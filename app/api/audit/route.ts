@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { requireAdmin } from "@/lib/session";
+import { requireMaster } from "@/lib/session";
 import { sql } from "@/lib/db";
 
 type AuditRow = {
@@ -14,7 +14,7 @@ type AuditRow = {
 };
 
 export async function GET(request: NextRequest) {
-  const session = await requireAdmin(request);
+  const session = await requireMaster(request);
 
   if (!session) {
     return NextResponse.json({ error: "Não autorizado" }, { status: 403 });

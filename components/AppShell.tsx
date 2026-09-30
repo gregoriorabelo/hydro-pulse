@@ -16,9 +16,10 @@ const NAV_LINKS_BEFORE_ADMIN = [
   { href: "/relatorios", label: "Relatórios" },
 ];
 
-const ADMIN_NAV_LINKS = [
+const MASTER_NAV_LINKS = [
   { href: "/usuarios", label: "Usuários" },
   { href: "/auditoria", label: "Auditoria" },
+  { href: "/diagnostico", label: "Diagnóstico" },
 ];
 
 const NAV_LINKS_AFTER_ADMIN = [{ href: "/configuracoes", label: "Configurações" }];
@@ -58,13 +59,13 @@ function CondominiumSelector() {
 }
 
 type SidebarContentProps = {
-  isAdmin: boolean;
+  isMaster: boolean;
   pathname: string;
   onNavigate?: () => void;
   onLogout: () => void;
 };
 
-function SidebarContent({ isAdmin, pathname, onNavigate, onLogout }: SidebarContentProps) {
+function SidebarContent({ isMaster, pathname, onNavigate, onLogout }: SidebarContentProps) {
   return (
     <>
       <div className="rounded-3xl border border-white/10 bg-brand-deep p-5">
@@ -101,7 +102,7 @@ function SidebarContent({ isAdmin, pathname, onNavigate, onLogout }: SidebarCont
       <nav className="mt-8 space-y-3 text-sm">
         {[
           ...NAV_LINKS_BEFORE_ADMIN,
-          ...(isAdmin ? ADMIN_NAV_LINKS : []),
+          ...(isMaster ? MASTER_NAV_LINKS : []),
           ...NAV_LINKS_AFTER_ADMIN,
         ].map((item) => {
           const active = pathname === item.href;
@@ -145,14 +146,14 @@ function SidebarContent({ isAdmin, pathname, onNavigate, onLogout }: SidebarCont
 export default function AppShell({ children }: { children: ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [isMaster, setIsMaster] = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
   useEffect(() => {
     fetch("/api/auth/me")
       .then((response) => (response.ok ? response.json() : null))
       .then((data: { role?: string } | null) => {
-        setIsAdmin(data?.role === "admin");
+        setIsMaster(data?.role === "master");
       });
   }, []);
 
@@ -214,7 +215,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
               </div>
 
               <SidebarContent
-                isAdmin={isAdmin}
+                isMaster={isMaster}
                 pathname={pathname}
                 onNavigate={() => setMobileNavOpen(false)}
                 onLogout={handleLogout}
@@ -224,7 +225,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
         )}
 
         <aside className="hidden w-72 shrink-0 border-r border-white/10 bg-brand-petrol p-6 lg:block">
-          <SidebarContent isAdmin={isAdmin} pathname={pathname} onLogout={handleLogout} />
+          <SidebarContent isMaster={isMaster} pathname={pathname} onLogout={handleLogout} />
         </aside>
 
         <div className="min-w-0 flex-1 p-6 lg:p-10">{children}</div>

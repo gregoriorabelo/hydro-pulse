@@ -22,8 +22,8 @@ beforeEach(() => {
 });
 
 describe("getCondominiumRole", () => {
-  it("admin sessions get admin role without querying the database", async () => {
-    const role = await getCondominiumRole(session("admin"), "condo-1");
+  it("master sessions get admin role for any condominium without querying the database", async () => {
+    const role = await getCondominiumRole(session("master"), "condo-1");
 
     expect(role).toBe("admin");
     expect(sqlMock).not.toHaveBeenCalled();

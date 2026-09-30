@@ -5,9 +5,20 @@ alertas preventivos e inteligência gerencial.
 
 ## Pendências em aberto
 
+- [x] **Rodar `db/migration_007_sensor_secret.sql` no Neon** — cria a coluna
+      `sensors.secret`. Sem ela, nenhum sensor consegue se autenticar em
+      `/api/readings` (a ingestão de leituras fica completamente quebrada).
 - [x] **Rodar `db/migration_008_condominium_contacts.sql` no Neon** — cria a
       tabela de contatos de WhatsApp por condomínio. Sem ela, a tela
       Contatos e o envio de alerta por WhatsApp não funcionam.
+- [x] **Rodar `db/migration_006_password_reset_rate_limit.sql` no Neon** —
+      cria a tabela `password_reset_attempts`. Sem ela, "Esqueci minha
+      senha" responde erro genérico.
+- [ ] **Rodar `db/migration_010_master_role.sql` no Neon** — só DEPOIS do
+      deploy do código correspondente já ter terminado. Converte o antigo
+      papel global "admin" (que dava acesso a todos os condomínios,
+      inclusive de outros clientes) para "master". Depois de rodar, saia e
+      entre de novo no app.
 - [ ] **Concluir o cadastro no Meta for Developers** — travado numa
       verificação de segurança do próprio Meta ("dispositivo diferente do
       habitual"). Tentar de novo mais tarde, ou pelo navegador que você já
@@ -68,13 +79,36 @@ para atualizar a estrutura existente.
   compartilhada por todos os sensores — se a chave de um vazar, só aquele
   sensor precisa ser regenerado.
 
+## Papéis e permissões
+
+Há dois níveis de papel, propositalmente separados para vender o produto a
+vários clientes com segurança:
+
+- **Papel global (`users.role`)**: `master` ou `operador`. Só existe uma
+  razão pra ser `master` — ser você, o operador da plataforma. Uma conta
+  `master` enxerga e gerencia **todos** os condomínios cadastrados (de
+  qualquer cliente), a lista completa de usuários, o log de auditoria e a
+  tela de Diagnóstico do Sistema. `operador` não dá nenhum acesso especial
+  por si só — o acesso de cada cliente é sempre definido pelo papel abaixo.
+- **Papel por condomínio (`user_condominiums.role`)**: `admin`, `sindico`,
+  `operador` ou `visualizador`. É esse papel que os seus clientes pagantes
+  recebem — dá controle total (`admin`/`sindico`) ou só leitura
+  (`visualizador`) **dentro do próprio condomínio deles**, sem nunca
+  enxergar dados de outro cliente nem acessar as áreas restritas à conta
+  master (Usuários, Auditoria, Diagnóstico, criar/editar/excluir
+  condomínios).
+
+Na prática: cadastre cada cliente como `operador` no papel global, e dê a
+ele acesso `admin` (ou o papel que fizer sentido) só no(s) condomínio(s)
+dele, pela tela Usuários.
+
 ## Criando o primeiro usuário
 
-Não há tela de cadastro — o acesso é só para os administradores. Crie/atualize
+Não há tela de cadastro — o acesso é só para a conta master. Crie/atualize
 um usuário com:
 
 ```bash
-DATABASE_URL="postgresql://..." node scripts/create-user.mjs seu-email@exemplo.com sua-senha
+DATABASE_URL="postgresql://..." node scripts/create-user.mjs seu-email@exemplo.com sua-senha master
 ```
 
 ## Rodando localmente

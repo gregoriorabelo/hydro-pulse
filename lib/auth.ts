@@ -16,7 +16,7 @@ function getSecretKey() {
 export type SessionPayload = {
   userId: string;
   email: string;
-  role: "admin" | "operador";
+  role: "master" | "operador";
 };
 
 export async function createSessionToken(payload: SessionPayload) {
@@ -36,7 +36,7 @@ export async function verifySessionToken(
     if (
       typeof payload.userId !== "string" ||
       typeof payload.email !== "string" ||
-      (payload.role !== "admin" && payload.role !== "operador")
+      (payload.role !== "master" && payload.role !== "operador")
     ) {
       return null;
     }

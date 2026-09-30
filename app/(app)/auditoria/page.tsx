@@ -75,7 +75,7 @@ export default function AuditoriaPage() {
       <main>
         <h1 className="text-4xl font-black text-white">Auditoria</h1>
         <p className="mt-4 text-slate-400">
-          Apenas administradores têm acesso a esta área.
+          Apenas a conta master tem acesso a esta área.
         </p>
       </main>
     );

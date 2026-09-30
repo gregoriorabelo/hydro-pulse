@@ -5,7 +5,7 @@ create table if not exists users (
   name text,
   email text unique not null,
   password_hash text not null,
-  role text not null default 'operador' check (role in ('admin', 'operador')),
+  role text not null default 'operador' check (role in ('master', 'operador')),
   created_at timestamptz not null default now()
 );
 

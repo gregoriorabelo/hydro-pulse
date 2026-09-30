@@ -15,7 +15,7 @@ describe("logAudit", () => {
     sqlMock.mockResolvedValueOnce([]);
 
     await logAudit({
-      session: { userId: "u1", email: "admin@teste.com", role: "admin" },
+      session: { userId: "u1", email: "admin@teste.com", role: "master" },
       action: "update",
       entityType: "sensor",
       entityId: "s1",
@@ -30,7 +30,7 @@ describe("logAudit", () => {
 
     await expect(
       logAudit({
-        session: { userId: "u1", email: "admin@teste.com", role: "admin" },
+        session: { userId: "u1", email: "admin@teste.com", role: "master" },
         action: "update",
         entityType: "sensor",
         entityId: "s1",

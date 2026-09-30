@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import Modal from "@/components/Modal";
 import ActionsMenu from "@/components/ActionsMenu";
 import { Field, NumberField } from "@/components/FormField";
@@ -26,6 +26,15 @@ export default function CondominiosPage() {
   const [editing, setEditing] = useState<Condominium | null>(null);
   const [form, setForm] = useState<CondominiumInput>(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
+  const [isMaster, setIsMaster] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/auth/me")
+      .then((response) => (response.ok ? response.json() : null))
+      .then((data: { role?: string } | null) => {
+        setIsMaster(data?.role === "master");
+      });
+  }, []);
 
   function openCreate() {
     setEditing(null);
@@ -90,13 +99,15 @@ export default function CondominiosPage() {
             </p>
           </div>
 
-          <button
-            type="button"
-            onClick={openCreate}
-            className="rounded-2xl bg-brand-gold px-5 py-3 font-semibold text-brand-deep transition hover:bg-[#e0c15c]"
-          >
-            + Novo Condomínio
-          </button>
+          {isMaster && (
+            <button
+              type="button"
+              onClick={openCreate}
+              className="rounded-2xl bg-brand-gold px-5 py-3 font-semibold text-brand-deep transition hover:bg-[#e0c15c]"
+            >
+              + Novo Condomínio
+            </button>
+          )}
         </div>
 
         <div className="overflow-x-auto rounded-[2rem] border border-white/10 bg-white/[0.03]">
@@ -110,7 +121,7 @@ export default function CondominiosPage() {
                   <th className="px-6 py-4 font-medium">Cidade</th>
                   <th className="px-6 py-4 font-medium">Responsável</th>
                   <th className="px-6 py-4 font-medium">Blocos previstos</th>
-                  <th className="px-6 py-4"></th>
+                  {isMaster && <th className="px-6 py-4"></th>}
                 </tr>
               </thead>
 
@@ -127,18 +138,20 @@ export default function CondominiosPage() {
                     <td className="px-6 py-4 text-slate-300">
                       {condominium.blocksExpected ?? "—"}
                     </td>
-                    <td className="px-6 py-4 text-right">
-                      <ActionsMenu
-                        actions={[
-                          { label: "Editar", onClick: () => openEdit(condominium) },
-                          {
-                            label: "Excluir",
-                            onClick: () => handleDelete(condominium),
-                            danger: true,
-                          },
-                        ]}
-                      />
-                    </td>
+                    {isMaster && (
+                      <td className="px-6 py-4 text-right">
+                        <ActionsMenu
+                          actions={[
+                            { label: "Editar", onClick: () => openEdit(condominium) },
+                            {
+                              label: "Excluir",
+                              onClick: () => handleDelete(condominium),
+                              danger: true,
+                            },
+                          ]}
+                        />
+                      </td>
+                    )}
                   </tr>
                 ))}
               </tbody>

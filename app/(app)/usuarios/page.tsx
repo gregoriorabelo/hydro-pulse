@@ -14,7 +14,7 @@ import {
 } from "@/types/entities";
 
 const GLOBAL_ROLE_LABELS: Record<GlobalRole, string> = {
-  admin: "Administrador",
+  master: "Master (acesso a todos os condomínios)",
   operador: "Operador",
 };
 
@@ -180,7 +180,7 @@ export default function UsuariosPage() {
         <h1 className="text-4xl font-black text-white">Usuários</h1>
 
         <p className="mt-4 text-slate-400">
-          Apenas administradores têm acesso a esta área.
+          Apenas a conta master tem acesso a esta área.
         </p>
       </main>
     );
@@ -235,8 +235,8 @@ export default function UsuariosPage() {
                       {GLOBAL_ROLE_LABELS[user.role]}
                     </td>
                     <td className="px-6 py-4 text-slate-300">
-                      {user.role === "admin" ? (
-                        <span className="text-slate-500">Todos (admin)</span>
+                      {user.role === "master" ? (
+                        <span className="text-slate-500">Todos (master)</span>
                       ) : user.condominiums.length === 0 ? (
                         <span className="text-slate-500">Nenhum</span>
                       ) : (

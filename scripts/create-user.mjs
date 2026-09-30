@@ -1,15 +1,15 @@
 import { neon } from "@neondatabase/serverless";
 import { hash } from "bcryptjs";
 
-const [, , email, password, role = "admin"] = process.argv;
+const [, , email, password, role = "master"] = process.argv;
 
 if (!email || !password) {
-  console.error("Uso: node scripts/create-user.mjs <email> <senha> [admin|operador]");
+  console.error("Uso: node scripts/create-user.mjs <email> <senha> [master|operador]");
   process.exit(1);
 }
 
-if (role !== "admin" && role !== "operador") {
-  console.error('Papel inválido. Use "admin" ou "operador".');
+if (role !== "master" && role !== "operador") {
+  console.error('Papel inválido. Use "master" ou "operador".');
   process.exit(1);
 }
 

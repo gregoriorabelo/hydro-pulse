@@ -6,7 +6,7 @@ export async function requireSession(request: NextRequest) {
   return token ? await verifySessionToken(token) : null;
 }
 
-export async function requireAdmin(request: NextRequest) {
+export async function requireMaster(request: NextRequest) {
   const session = await requireSession(request);
-  return session && session.role === "admin" ? session : null;
+  return session && session.role === "master" ? session : null;
 }

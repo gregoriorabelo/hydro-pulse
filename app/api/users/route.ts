@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { requireAdmin } from "@/lib/session";
+import { requireMaster } from "@/lib/session";
 import { logAudit } from "@/lib/audit";
 import { createUser, listUsers } from "@/services/userService";
 import type { UserInput } from "@/types/entities";
 
 export async function GET(request: NextRequest) {
-  const session = await requireAdmin(request);
+  const session = await requireMaster(request);
 
   if (!session) {
     return NextResponse.json({ error: "Não autorizado" }, { status: 403 });
@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const session = await requireAdmin(request);
+  const session = await requireMaster(request);
 
   if (!session) {
     return NextResponse.json({ error: "Não autorizado" }, { status: 403 });

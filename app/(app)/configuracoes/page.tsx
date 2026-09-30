@@ -3,10 +3,10 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { Field } from "@/components/FormField";
 
-type Me = { name: string | null; email: string; role: "admin" | "operador" };
+type Me = { name: string | null; email: string; role: "master" | "operador" };
 
 const ROLE_LABELS: Record<Me["role"], string> = {
-  admin: "Administrador",
+  master: "Master",
   operador: "Operador",
 };
 

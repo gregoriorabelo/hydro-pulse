@@ -6,7 +6,7 @@ export async function getCondominiumRole(
   session: SessionPayload,
   condominiumId: string
 ): Promise<CondominiumRole | null> {
-  if (session.role === "admin") return "admin";
+  if (session.role === "master") return "admin";
 
   const rows = (await sql`
     select role from user_condominiums
