@@ -102,6 +102,14 @@ Na prática: cadastre cada cliente como `operador` no papel global, e dê a
 ele acesso `admin` (ou o papel que fizer sentido) só no(s) condomínio(s)
 dele, pela tela Usuários.
 
+A partir daí, o próprio cliente (com papel `admin` ou `sindico` naquele
+condomínio) pode convidar mais gente pela tela **Equipe**, sem depender de
+você — limitado a **2 usuários adicionais por condomínio** (síndico/operador/
+visualizador; nunca outro `admin`, pra evitar múltiplos administradores
+criados sem revisão). Se o e-mail convidado já tiver conta no HydroPulse, só
+liberamos o acesso ao condomínio; se for novo, mandamos um link por e-mail
+pra pessoa definir a própria senha (válido por 7 dias).
+
 ## Criando o primeiro usuário
 
 Não há tela de cadastro — o acesso é só para a conta master. Crie/atualize

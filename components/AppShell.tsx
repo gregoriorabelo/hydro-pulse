@@ -13,6 +13,7 @@ const NAV_LINKS_BEFORE_ADMIN = [
   { href: "/reservatorios", label: "Reservatórios" },
   { href: "/sensores", label: "Sensores" },
   { href: "/contatos", label: "Contatos" },
+  { href: "/equipe", label: "Equipe" },
   { href: "/relatorios", label: "Relatórios" },
 ];
 

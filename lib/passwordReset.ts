@@ -12,11 +12,14 @@ function getSecretKey() {
   return new TextEncoder().encode(secret);
 }
 
-export async function createResetToken(userId: string): Promise<string> {
+export async function createResetToken(
+  userId: string,
+  expiresInSeconds: number = RESET_DURATION_SECONDS
+): Promise<string> {
   return new SignJWT({ userId, purpose: "password_reset" })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
-    .setExpirationTime(`${RESET_DURATION_SECONDS}s`)
+    .setExpirationTime(`${expiresInSeconds}s`)
     .sign(getSecretKey());
 }
 
