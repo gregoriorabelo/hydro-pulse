@@ -16,31 +16,40 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
 
   const { id } = await params;
 
-  const condominiumId = await getCondominiumIdForSensor(id);
+  try {
+    const condominiumId = await getCondominiumIdForSensor(id);
 
-  if (!condominiumId) {
-    return NextResponse.json({ error: "Sensor não encontrado" }, { status: 404 });
+    if (!condominiumId) {
+      return NextResponse.json({ error: "Sensor não encontrado" }, { status: 404 });
+    }
+
+    const role = await getCondominiumRole(session, condominiumId);
+
+    if (!canWrite(role)) {
+      return NextResponse.json({ error: "Sem permissão para este condomínio" }, { status: 403 });
+    }
+
+    const secret = await regenerateSensorSecret(id);
+
+    if (!secret) {
+      return NextResponse.json({ error: "Sensor não encontrado" }, { status: 404 });
+    }
+
+    await logAudit({
+      session,
+      action: "update",
+      entityType: "sensor",
+      entityId: id,
+      details: { action: "regenerate_secret" },
+    });
+
+    return NextResponse.json({ secret });
+  } catch (error) {
+    console.error("[sensors/secret] Falha ao gerar nova chave", {
+      sensorId: id,
+      message: error instanceof Error ? error.message : String(error),
+    });
+
+    return NextResponse.json({ error: "Não foi possível gerar uma nova chave." }, { status: 500 });
   }
-
-  const role = await getCondominiumRole(session, condominiumId);
-
-  if (!canWrite(role)) {
-    return NextResponse.json({ error: "Sem permissão para este condomínio" }, { status: 403 });
-  }
-
-  const secret = await regenerateSensorSecret(id);
-
-  if (!secret) {
-    return NextResponse.json({ error: "Sensor não encontrado" }, { status: 404 });
-  }
-
-  await logAudit({
-    session,
-    action: "update",
-    entityType: "sensor",
-    entityId: id,
-    details: { action: "regenerate_secret" },
-  });
-
-  return NextResponse.json({ secret });
 }
