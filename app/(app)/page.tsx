@@ -114,7 +114,7 @@ export default function Home() {
             </Link>
           </p>
         ) : (
-          <div className="mt-8 grid gap-6">
+          <div className="mt-8 grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
             {blocks.map((block) => (
               <BlockCard
                 key={block.databaseId}

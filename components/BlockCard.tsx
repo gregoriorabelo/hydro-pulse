@@ -33,7 +33,15 @@ function getStatusStyle(status: WaterStatus) {
   return styles[status];
 }
 
-function WaterHistoryChart({ block, height }: { block: WaterBlock; height: number }) {
+function WaterHistoryChart({
+  block,
+  height,
+  compact = false,
+}: {
+  block: WaterBlock;
+  height: number;
+  compact?: boolean;
+}) {
   return (
     <ResponsiveContainer width="100%" height={height}>
       <AreaChart data={block.historico}>
@@ -50,20 +58,22 @@ function WaterHistoryChart({ block, height }: { block: WaterBlock; height: numbe
           </linearGradient>
         </defs>
 
-        <CartesianGrid stroke="rgba(255,255,255,0.06)" vertical={false} />
+        {!compact && <CartesianGrid stroke="rgba(255,255,255,0.06)" vertical={false} />}
 
         <XAxis
           dataKey="hora"
-          tick={{ fill: "#94A3B8", fontSize: 11 }}
+          tick={compact ? false : { fill: "#94A3B8", fontSize: 11 }}
           axisLine={false}
           tickLine={false}
+          hide={compact}
         />
 
         <YAxis
           domain={[0, 100]}
-          tick={{ fill: "#94A3B8", fontSize: 11 }}
+          tick={compact ? false : { fill: "#94A3B8", fontSize: 11 }}
           axisLine={false}
           tickLine={false}
+          hide={compact}
         />
 
         <Tooltip
@@ -79,7 +89,7 @@ function WaterHistoryChart({ block, height }: { block: WaterBlock; height: numbe
           type="monotone"
           dataKey="valor"
           stroke="#00B8FF"
-          strokeWidth={3}
+          strokeWidth={compact ? 2 : 3}
           fill={`url(#water-gradient-${block.id})`}
         />
       </AreaChart>
@@ -91,77 +101,45 @@ export default function BlockCard({ block, peak }: BlockCardProps) {
   const [detailsOpen, setDetailsOpen] = useState(false);
 
   return (
-    <div className="rounded-[2rem] border border-white/10 bg-white/[0.03] p-8">
-      <div className="flex items-start justify-between">
+    <div className="rounded-[2rem] border border-white/10 bg-white/[0.03] p-6">
+      <div className="flex items-start justify-between gap-4">
         <div>
           <p className="text-slate-400">Bloco {block.blockName}</p>
 
-          <h3 className="mt-2 text-5xl font-black text-white">
+          <h3 className="mt-1 text-2xl font-black text-white">
             {block.id}
           </h3>
         </div>
 
-        <div
-          className={`rounded-full border px-5 py-2 text-lg font-semibold ${getStatusStyle(
-            block.status
-          )}`}
-        >
-          {block.status}
-        </div>
-      </div>
+        <div className="flex flex-col items-end gap-2">
+          <div
+            className={`rounded-full border px-4 py-1.5 text-sm font-semibold ${getStatusStyle(
+              block.status
+            )}`}
+          >
+            {block.status}
+          </div>
 
-      <div className="mt-8 grid grid-cols-2 gap-4">
-        <div className="rounded-3xl bg-brand-petrol p-5">
-          <p className="text-slate-400">Nível atual</p>
-
-          <h4 className="mt-4 text-5xl font-black text-white">
-            {block.nivel}%
-          </h4>
-        </div>
-
-        <div className="rounded-3xl bg-brand-petrol p-5">
-          <p className="text-slate-400">Profundidade</p>
-
-          <h4 className="mt-4 text-5xl font-black text-white">
-            {block.profundidade !== null ? `${block.profundidade} cm` : "—"}
-          </h4>
+          <p className="text-sm text-slate-400">
+            Nível: <span className="font-semibold text-white">{block.nivel}%</span>
+          </p>
         </div>
       </div>
 
       <button
         type="button"
         onClick={() => setDetailsOpen(true)}
-        className="group mt-6 block w-full rounded-3xl bg-brand-petrol p-4 text-left transition hover:ring-2 hover:ring-brand-cyan/40"
+        className="group mt-4 block w-full rounded-2xl bg-brand-petrol p-3 text-left transition hover:ring-2 hover:ring-brand-cyan/40"
         aria-label={`Ver detalhes completos de ${block.id}`}
       >
-        <div className="h-72">
-          <WaterHistoryChart block={block} height={288} />
+        <div className="h-24">
+          <WaterHistoryChart block={block} height={96} compact />
         </div>
 
-        <p className="mt-3 text-center text-sm text-slate-400 transition group-hover:text-brand-cyan">
-          Clique no gráfico para ver todas as informações
+        <p className="mt-2 text-center text-xs text-slate-400 transition group-hover:text-brand-cyan">
+          Clique para ver todas as informações
         </p>
       </button>
-
-      <div className="mt-6 rounded-3xl bg-brand-petrol p-5">
-        <p className="text-slate-400">Autonomia estimada</p>
-
-        <h4 className="mt-3 text-3xl font-bold text-white">
-          {block.autonomia}
-        </h4>
-
-        <p className="mt-4 text-slate-500">
-          Última atualização: {block.atualizacao}
-        </p>
-      </div>
-
-      <div className="mt-6 rounded-3xl border border-brand-tech/20 bg-brand-tech/10 p-5">
-        <p className="font-semibold text-brand-cyan">
-          Alerta Operacional
-        </p>
-
-        <p className="mt-3 text-slate-200">{block.alerta}</p>
-      </div>
 
       {detailsOpen && (
         <Modal
