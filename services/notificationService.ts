@@ -9,6 +9,7 @@ type ReservoirRow = {
   status: "ativo" | "pausado";
   critical_level_percent: string;
   attention_level_percent: string;
+  high_level_percent: string;
   block_name: string;
   condominium_id: string;
   condominium_name: string;
@@ -17,7 +18,7 @@ type ReservoirRow = {
 type RecipientRow = { email: string };
 type ContactRow = { phone_number: string };
 
-export async function notifyIfEnteredCritical(
+export async function notifyIfEnteredAlertState(
   reservoirId: string,
   newLevel: number,
   previousLevel: number | null
@@ -26,7 +27,8 @@ export async function notifyIfEnteredCritical(
     const rows = (await sql`
       select
         r.id, r.name, r.status, r.critical_level_percent, r.attention_level_percent,
-        b.name as block_name, b.condominium_id, c.name as condominium_name
+        r.high_level_percent, b.name as block_name, b.condominium_id,
+        c.name as condominium_name
       from reservoirs r
       join blocks b on b.id = r.block_id
       join condominiums c on c.id = b.condominium_id
@@ -39,24 +41,33 @@ export async function notifyIfEnteredCritical(
 
     const criticalLevel = Number(reservoir.critical_level_percent);
     const attentionLevel = Number(reservoir.attention_level_percent);
+    const highLevel = Number(reservoir.high_level_percent);
 
     const newStatus = calculateStatus(
       reservoir.status,
       true,
       newLevel,
       criticalLevel,
-      attentionLevel
+      attentionLevel,
+      highLevel
     );
 
-    if (newStatus !== "Crítico") return;
+    if (newStatus !== "Crítico" && newStatus !== "Transbordamento") return;
 
     const previousStatus =
       previousLevel === null
         ? null
-        : calculateStatus(reservoir.status, true, previousLevel, criticalLevel, attentionLevel);
+        : calculateStatus(
+            reservoir.status,
+            true,
+            previousLevel,
+            criticalLevel,
+            attentionLevel,
+            highLevel
+          );
 
-    // Só notifica na transição para Crítico, para não reenviar a cada leitura.
-    if (previousStatus === "Crítico") return;
+    // Notifica somente quando entra em uma faixa crítica, evitando reenvio a cada leitura.
+    if (previousStatus === newStatus) return;
 
     const recipients = (await sql`
       select distinct email from users where role = 'admin'
@@ -68,35 +79,54 @@ export async function notifyIfEnteredCritical(
         and uc.role in ('admin', 'sindico', 'operador')
     `) as RecipientRow[];
 
-    const contacts = (await sql`
-      select phone_number from condominium_contacts
-      where condominium_id = ${reservoir.condominium_id}
-    `) as ContactRow[];
+    const isOverflow = newStatus === "Transbordamento";
+    const subject = isOverflow
+      ? `Risco de transbordamento — ${reservoir.name} (${reservoir.condominium_name})`
+      : `Nível crítico — ${reservoir.name} (${reservoir.condominium_name})`;
 
-    await Promise.all([
-      ...recipients.map((recipient) =>
-        sendEmail({
-          to: recipient.email,
-          subject: `Nível crítico — ${reservoir.name} (${reservoir.condominium_name})`,
-          html: `
-            <p>O reservatório <strong>${reservoir.name}</strong> (bloco ${reservoir.block_name},
-            ${reservoir.condominium_name}) atingiu nível crítico.</p>
-            <p>Nível atual: <strong>${newLevel}%</strong> (limite crítico: ${criticalLevel}%)</p>
-            <p>Acesse o HydroPulse para mais detalhes.</p>
-          `,
-        })
-      ),
-      ...contacts.map((contact) =>
-        sendCriticalAlertWhatsApp({
-          to: contact.phone_number,
-          reservoirName: reservoir.name,
-          blockName: reservoir.block_name,
-          levelPercent: newLevel,
-          criticalLevelPercent: criticalLevel,
-        })
-      ),
-    ]);
+    const html = isOverflow
+      ? `
+          <p>O reservatório <strong>${reservoir.name}</strong> (bloco ${reservoir.block_name},
+          ${reservoir.condominium_name}) ultrapassou o limite máximo configurado.</p>
+          <p>Nível atual: <strong>${newLevel}%</strong> (limite alto: ${highLevel}%)</p>
+          <p>Há risco de transbordamento. Verificação imediata recomendada.</p>
+          <p>Acesse o HydroPulse para mais detalhes.</p>
+        `
+      : `
+          <p>O reservatório <strong>${reservoir.name}</strong> (bloco ${reservoir.block_name},
+          ${reservoir.condominium_name}) atingiu nível crítico.</p>
+          <p>Nível atual: <strong>${newLevel}%</strong> (limite crítico: ${criticalLevel}%)</p>
+          <p>Acesse o HydroPulse para mais detalhes.</p>
+        `;
+
+    const tasks: Promise<unknown>[] = recipients.map((recipient) =>
+      sendEmail({ to: recipient.email, subject, html })
+    );
+
+    // O template atual do WhatsApp é específico para nível crítico baixo.
+    // O transbordamento já aparece no app e é enviado por e-mail; um template
+    // próprio do WhatsApp pode ser adicionado depois sem mensagem ambígua.
+    if (!isOverflow) {
+      const contacts = (await sql`
+        select phone_number from condominium_contacts
+        where condominium_id = ${reservoir.condominium_id}
+      `) as ContactRow[];
+
+      tasks.push(
+        ...contacts.map((contact) =>
+          sendCriticalAlertWhatsApp({
+            to: contact.phone_number,
+            reservoirName: reservoir.name,
+            blockName: reservoir.block_name,
+            levelPercent: newLevel,
+            criticalLevelPercent: criticalLevel,
+          })
+        )
+      );
+    }
+
+    await Promise.all(tasks);
   } catch (error) {
-    console.error("Falha ao notificar nível crítico:", error);
+    console.error("Falha ao notificar faixa crítica do reservatório:", error);
   }
 }

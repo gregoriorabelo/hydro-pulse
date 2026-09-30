@@ -6,7 +6,7 @@ type OperationalOverviewProps = {
 
 function getAverageLevel(blocks: WaterBlock[]) {
   const withValidReading = blocks.filter(
-    (block) => block.status === "Normal" || block.status === "Atenção" || block.status === "Crítico"
+    (block) => block.status === "Normal" || block.status === "Atenção" || block.status === "Crítico" || block.status === "Transbordamento"
   );
 
   if (withValidReading.length === 0) return 0;
@@ -23,11 +23,16 @@ function getAttentionBlocks(blocks: WaterBlock[]) {
   return blocks.filter((block) => block.status === "Atenção").length;
 }
 
+function getOverflowBlocks(blocks: WaterBlock[]) {
+  return blocks.filter((block) => block.status === "Transbordamento").length;
+}
+
 function getOperationalRisk(blocks: WaterBlock[]) {
   const critical = getCriticalBlocks(blocks);
   const attention = getAttentionBlocks(blocks);
+  const overflow = getOverflowBlocks(blocks);
 
-  if (critical > 0) return "Alto";
+  if (critical > 0 || overflow > 0) return "Alto";
   if (attention >= 2) return "Moderado";
   if (attention === 1) return "Baixo";
   return "Controlado";
@@ -37,6 +42,7 @@ export default function OperationalOverview({ blocks }: OperationalOverviewProps
   const averageLevel = getAverageLevel(blocks);
   const criticalBlocks = getCriticalBlocks(blocks);
   const attentionBlocks = getAttentionBlocks(blocks);
+  const overflowBlocks = getOverflowBlocks(blocks);
   const risk = getOperationalRisk(blocks);
 
   return (
@@ -66,7 +72,12 @@ export default function OperationalOverview({ blocks }: OperationalOverviewProps
         </div>
 
         <div className="min-w-0 rounded-3xl bg-brand-petrol p-6">
-          <p className="text-slate-400">Risco de falta d’água</p>
+          <p className="text-slate-400">Risco de transbordamento</p>
+          <h3 className="mt-4 break-words text-3xl font-black text-white">{overflowBlocks}</h3>
+        </div>
+
+        <div className="min-w-0 rounded-3xl bg-brand-petrol p-6">
+          <p className="text-slate-400">Risco operacional</p>
           <h3 className="mt-4 break-words text-2xl font-black text-white">{risk}</h3>
         </div>
       </div>

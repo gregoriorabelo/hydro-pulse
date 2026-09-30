@@ -21,6 +21,7 @@ function getStatusStyle(status: WaterStatus) {
     "Sem sinal": "border-slate-500/20 bg-slate-500/10 text-slate-300",
     Pausado: "border-slate-500/20 bg-slate-500/10 text-slate-400",
     Reabastecendo: "border-brand-tech/20 bg-brand-tech/10 text-brand-cyan",
+    Transbordamento: "border-orange-500/20 bg-orange-500/10 text-orange-300",
   };
 
   return styles[status];
@@ -60,7 +61,7 @@ export default function BlockCard({ block }: BlockCardProps) {
           <p className="text-slate-400">Profundidade</p>
 
           <h4 className="mt-4 text-5xl font-black text-white">
-            {block.profundidade} cm
+            {block.profundidade !== null ? `${block.profundidade} cm` : "—"}
           </h4>
         </div>
       </div>

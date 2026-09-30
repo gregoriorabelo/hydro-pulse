@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { sql } from "@/lib/db";
 import { keysMatch } from "@/lib/keyMatch";
 import { getSensorAuth } from "@/services/sensorService";
-import { notifyIfEnteredCritical } from "@/services/notificationService";
+import { notifyIfEnteredAlertState } from "@/services/notificationService";
 
 type LastReadingRow = {
   water_level: string;
@@ -71,7 +71,7 @@ export async function POST(request: Request) {
       values (${sensorAuth.reservoirId}, ${water_level}, ${depth_cm ?? null})
     `;
 
-    await notifyIfEnteredCritical(sensorAuth.reservoirId, Number(water_level), previousLevel);
+    await notifyIfEnteredAlertState(sensorAuth.reservoirId, Number(water_level), previousLevel);
 
     return NextResponse.json({
       success: true,

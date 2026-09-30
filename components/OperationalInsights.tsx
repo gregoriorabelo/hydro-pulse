@@ -1,6 +1,6 @@
 import type { WaterBlock } from "@/types/block";
 
-type InsightSeverity = "Normal" | "Atenção" | "Crítico" | "Sem sinal" | "Pausado";
+type InsightSeverity = "Normal" | "Atenção" | "Crítico" | "Transbordamento" | "Sem sinal" | "Pausado";
 
 type Insight = {
   message: string;
@@ -13,6 +13,8 @@ type OperationalInsightsProps = {
 
 function getInsightMessage(block: WaterBlock): string {
   switch (block.status) {
+    case "Transbordamento":
+      return `${block.id} (bloco ${block.blockName}) está acima do limite máximo, com risco de transbordamento.`;
     case "Crítico":
       return `${block.id} (bloco ${block.blockName}) está em nível crítico e exige ação imediata.`;
     case "Atenção":
@@ -38,6 +40,7 @@ function getInsightStyle(severity: InsightSeverity) {
     Normal: "border-emerald-500/20 bg-emerald-500/10 text-emerald-100",
     Atenção: "border-yellow-500/20 bg-yellow-500/10 text-yellow-100",
     Crítico: "border-red-500/20 bg-red-500/10 text-red-100",
+    Transbordamento: "border-orange-500/20 bg-orange-500/10 text-orange-100",
     "Sem sinal": "border-slate-500/20 bg-slate-500/10 text-slate-300",
     Pausado: "border-slate-500/20 bg-slate-500/10 text-slate-400",
   };
