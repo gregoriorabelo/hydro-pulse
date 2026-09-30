@@ -10,9 +10,10 @@
 -- é só sair e entrar de novo que a conta volta ao normal, já como master.
 -- Rode este arquivo no seu banco Neon existente (SQL editor ou psql).
 
+alter table users drop constraint if exists users_role_check;
+
 update users set role = 'master' where role = 'admin';
 
-alter table users drop constraint if exists users_role_check;
 alter table users add constraint users_role_check check (role in ('master', 'operador'));
 
 alter table users alter column role set default 'operador';
