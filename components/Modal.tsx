@@ -6,12 +6,21 @@ type ModalProps = {
   title: string;
   onClose: () => void;
   children: ReactNode;
+  maxWidthClassName?: string;
 };
 
-export default function Modal({ title, onClose, children }: ModalProps) {
+export default function Modal({
+  title,
+  onClose,
+  children,
+  maxWidthClassName = "max-w-lg",
+}: ModalProps) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-      <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-[2rem] border border-white/10 bg-brand-petrol p-8 shadow-2xl">
+      <div
+        className={`max-h-[90vh] w-full ${maxWidthClassName} overflow-y-auto rounded-[2rem] border border-white/10 bg-brand-petrol p-8 shadow-2xl`}
+      >
+
         <div className="mb-6 flex items-center justify-between">
           <h2 className="text-2xl font-black text-white">{title}</h2>
 
