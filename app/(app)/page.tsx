@@ -54,44 +54,69 @@ export default function Home() {
 
   return (
     <main className="space-y-8">
-      <section className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-brand-deep p-10 shadow-2xl shadow-black/30">
+      <section className="relative overflow-hidden rounded-[1.75rem] border border-white/10 bg-brand-deep p-6 shadow-2xl shadow-black/30 lg:p-8">
         <div className="pointer-events-none absolute inset-0 opacity-40">
           <div className="absolute bottom-0 left-0 h-40 w-full bg-[radial-gradient(circle_at_bottom_left,rgba(0,136,204,0.35),transparent_45%)]" />
           <div className="absolute bottom-0 right-0 h-40 w-full bg-[radial-gradient(circle_at_bottom_right,rgba(0,184,255,0.18),transparent_45%)]" />
         </div>
 
-        <div className="relative grid gap-8 lg:grid-cols-[1.4fr_0.8fr] lg:items-center">
+        <div className="relative grid gap-6 lg:grid-cols-[1.4fr_0.8fr] lg:items-center">
           <div>
-            <div className="mb-7 inline-flex rounded-2xl border border-brand-cyan/30 bg-brand-cyan/10 px-5 py-2 text-sm font-semibold text-brand-cyan">
+            <div className="mb-4 inline-flex rounded-2xl border border-brand-cyan/30 bg-brand-cyan/10 px-4 py-1.5 text-sm font-semibold text-brand-cyan">
               Inteligência hídrica. Decisões em tempo real.
             </div>
 
-            <h1 className="text-5xl font-black tracking-tight lg:text-6xl">
+            <h1 className="text-4xl font-black tracking-tight lg:text-5xl">
               <span className="text-white">Hydro</span>
               <span className="bg-gradient-to-r from-brand-tech to-brand-cyan bg-clip-text text-transparent">
                 Pulse
               </span>
             </h1>
 
-            <p className="mt-6 max-w-2xl text-xl leading-9 text-slate-300">
+            <p className="mt-4 max-w-2xl text-lg leading-7 text-slate-300">
               Monitoramento hídrico inteligente para condomínios com visão
               operacional, alertas preventivos e inteligência gerencial.
             </p>
           </div>
 
-          <div className="rounded-[2rem] border border-white/10 bg-brand-petrol/80 p-8 shadow-xl">
-            <p className="text-xl text-slate-400">Ambiente monitorado</p>
+          <div className="rounded-[1.5rem] border border-white/10 bg-brand-petrol/80 p-5 shadow-xl">
+            <p className="text-base text-slate-400">Ambiente monitorado</p>
 
-            <h2 className="mt-6 text-4xl font-black text-white">
+            <h2 className="mt-3 text-3xl font-black text-white">
               {activeCondominium?.name ?? "—"}
             </h2>
 
-            <p className="mt-6 flex items-center gap-2 text-lg text-sky-100">
+            <p className="mt-3 flex items-center gap-2 text-base text-sky-100">
               Dados conectados ao banco de dados
               <span className="text-emerald-400">✓</span>
             </p>
           </div>
         </div>
+      </section>
+
+      <section>
+        <h2 className="text-4xl font-black text-white">
+          Monitoramento dos Blocos
+        </h2>
+
+        <p className="mt-3 text-lg text-slate-400">
+          Visão operacional individual por reservatório
+        </p>
+
+        {blocks.length === 0 ? (
+          <p className="mt-8 text-slate-400">
+            Nenhum reservatório cadastrado para este condomínio ainda.{" "}
+            <Link href="/reservatorios" className="text-brand-cyan underline">
+              Cadastrar reservatório
+            </Link>
+          </p>
+        ) : (
+          <div className="mt-8 grid gap-6 lg:grid-cols-2">
+            {blocks.map((block) => (
+              <BlockCard key={block.databaseId} block={block} />
+            ))}
+          </div>
+        )}
       </section>
 
       <section className="grid gap-5 md:grid-cols-2 xl:grid-cols-5">
@@ -131,31 +156,6 @@ export default function Home() {
         <OperationalOverview blocks={blocks} />
         <AlertCenter blocks={blocks} />
         <OperationalInsights blocks={blocks} />
-      </section>
-
-      <section>
-        <h2 className="text-5xl font-black text-white">
-          Monitoramento dos Blocos
-        </h2>
-
-        <p className="mt-4 text-xl text-slate-400">
-          Visão operacional individual por reservatório
-        </p>
-
-        {blocks.length === 0 ? (
-          <p className="mt-10 text-slate-400">
-            Nenhum reservatório cadastrado para este condomínio ainda.{" "}
-            <Link href="/reservatorios" className="text-brand-cyan underline">
-              Cadastrar reservatório
-            </Link>
-          </p>
-        ) : (
-          <div className="mt-10 grid gap-6 lg:grid-cols-2">
-            {blocks.map((block) => (
-              <BlockCard key={block.databaseId} block={block} />
-            ))}
-          </div>
-        )}
       </section>
     </main>
   );
