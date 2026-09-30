@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { WaterBlock, WaterStatus } from "@/types/block";
+import type { ReservoirPeakUsage } from "@/lib/peakUsage";
 import {
   Area,
   AreaChart,
@@ -15,6 +16,7 @@ import Modal from "@/components/Modal";
 
 type BlockCardProps = {
   block: WaterBlock;
+  peak?: ReservoirPeakUsage;
 };
 
 function getStatusStyle(status: WaterStatus) {
@@ -85,7 +87,7 @@ function WaterHistoryChart({ block, height }: { block: WaterBlock; height: numbe
   );
 }
 
-export default function BlockCard({ block }: BlockCardProps) {
+export default function BlockCard({ block, peak }: BlockCardProps) {
   const [detailsOpen, setDetailsOpen] = useState(false);
 
   return (
@@ -215,6 +217,33 @@ export default function BlockCard({ block }: BlockCardProps) {
             <p className="font-semibold text-brand-cyan">Alerta Operacional</p>
             <p className="mt-3 text-slate-200">{block.alerta}</p>
           </div>
+
+          {peak && (
+            <div className="mt-6 rounded-3xl bg-brand-deep p-5">
+              <p className="text-slate-400">Pico de uso (últimos 7 dias)</p>
+
+              {peak.peakHourLabel === null ? (
+                <p className="mt-2 text-lg text-slate-300">
+                  Sem consumo detectado no período.
+                </p>
+              ) : (
+                <>
+                  <h4 className="mt-2 text-2xl font-bold text-white">
+                    {peak.peakHourLabel} — queda de {peak.peakConsumptionPercent}%
+                    {peak.peakConsumptionLiters !== null &&
+                      ` (≈${peak.peakConsumptionLiters} L)`}
+                  </h4>
+
+                  <p className="mt-2 text-slate-500">
+                    Consumo total no período:{" "}
+                    {peak.totalConsumptionPercent}%
+                    {peak.totalConsumptionLiters !== null &&
+                      ` (≈${peak.totalConsumptionLiters} L)`}
+                  </p>
+                </>
+              )}
+            </div>
+          )}
 
           {block.historico.length > 0 && (
             <div className="mt-6">

@@ -5,7 +5,9 @@ import BlockCard from "@/components/BlockCard";
 import OperationalInsights from "@/components/OperationalInsights";
 import OperationalOverview from "@/components/OperationalOverview";
 import AlertCenter from "@/components/AlertCenter";
+import PeakUsageInsights from "@/components/PeakUsageInsights";
 import { useWaterMonitoring } from "@/hooks/useWaterMonitoring";
+import { usePeakUsage } from "@/hooks/usePeakUsage";
 import { useCondominiumContext } from "@/lib/condominium-context";
 
 function getAverageLevel(blocks: { nivel: number; status: string }[]) {
@@ -23,6 +25,7 @@ export default function Home() {
   const { condominiums, activeCondominiumId, loading: loadingCondominiums } =
     useCondominiumContext();
   const { blocks } = useWaterMonitoring();
+  const { peaks } = usePeakUsage();
 
   const activeCondominium = condominiums.find((c) => c.id === activeCondominiumId);
   const averageLevel = getAverageLevel(blocks);
@@ -113,7 +116,11 @@ export default function Home() {
         ) : (
           <div className="mt-8 grid gap-6">
             {blocks.map((block) => (
-              <BlockCard key={block.databaseId} block={block} />
+              <BlockCard
+                key={block.databaseId}
+                block={block}
+                peak={peaks.find((peak) => peak.reservoirId === block.databaseId)}
+              />
             ))}
           </div>
         )}
@@ -157,6 +164,8 @@ export default function Home() {
         <AlertCenter blocks={blocks} />
         <OperationalInsights blocks={blocks} />
       </section>
+
+      <PeakUsageInsights peaks={peaks} />
     </main>
   );
 }
