@@ -19,11 +19,15 @@ export async function logAudit(params: {
 }): Promise<void> {
   const { session, action, entityType, entityId, details } = params;
 
-  await sql`
-    insert into audit_log (user_id, user_email, action, entity_type, entity_id, details)
-    values (
-      ${session.userId}, ${session.email}, ${action}, ${entityType}, ${entityId},
-      ${details ? JSON.stringify(details) : null}
-    )
-  `;
+  try {
+    await sql`
+      insert into audit_log (user_id, user_email, action, entity_type, entity_id, details)
+      values (
+        ${session.userId}, ${session.email}, ${action}, ${entityType}, ${entityId},
+        ${details ? JSON.stringify(details) : null}
+      )
+    `;
+  } catch (error) {
+    console.error("[audit] Falha ao registrar log de auditoria", error);
+  }
 }
