@@ -44,6 +44,19 @@ describe("getCondominiumRole", () => {
 
     expect(role).toBeNull();
   });
+
+  it("having admin access to one condominium never grants access to another (multi-tenant isolation)", async () => {
+    const user = session("operador");
+
+    sqlMock.mockResolvedValueOnce([{ role: "admin" }]);
+    const roleForOwnCondo = await getCondominiumRole(user, "condo-a");
+    expect(roleForOwnCondo).toBe("admin");
+
+    sqlMock.mockResolvedValueOnce([]);
+    const roleForOtherCondo = await getCondominiumRole(user, "condo-b");
+    expect(roleForOtherCondo).toBeNull();
+    expect(canWrite(roleForOtherCondo)).toBe(false);
+  });
 });
 
 describe("canWrite", () => {

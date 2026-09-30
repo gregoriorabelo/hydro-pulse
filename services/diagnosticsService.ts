@@ -12,6 +12,7 @@ type SchemaCheckRow = {
   sensors_secret: boolean;
   condominium_contacts: boolean;
   reservoirs_high_level: boolean;
+  master_role: boolean;
 };
 
 export async function getSchemaChecks(): Promise<SchemaCheck[]> {
@@ -36,7 +37,10 @@ export async function getSchemaChecks(): Promise<SchemaCheck[]> {
       exists (
         select 1 from information_schema.columns
         where table_name = 'reservoirs' and column_name = 'high_level_percent'
-      ) as reservoirs_high_level
+      ) as reservoirs_high_level,
+      not exists (
+        select 1 from users where role = 'admin'
+      ) as master_role
   `) as SchemaCheckRow[];
 
   const row = rows[0];
@@ -53,6 +57,10 @@ export async function getSchemaChecks(): Promise<SchemaCheck[]> {
     {
       label: "reservoirs.high_level_percent — limite de transbordamento",
       ok: row.reservoirs_high_level,
+    },
+    {
+      label: "users.role — papel master (isolamento entre clientes)",
+      ok: row.master_role,
     },
   ];
 }

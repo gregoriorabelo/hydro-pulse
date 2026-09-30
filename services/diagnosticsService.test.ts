@@ -20,12 +20,13 @@ describe("getSchemaChecks", () => {
         sensors_secret: true,
         condominium_contacts: true,
         reservoirs_high_level: true,
+        master_role: true,
       },
     ]);
 
     const checks = await getSchemaChecks();
 
-    expect(checks).toHaveLength(6);
+    expect(checks).toHaveLength(7);
     expect(checks.every((c) => typeof c.label === "string")).toBe(true);
 
     const passwordReset = checks.find((c) => c.label.includes("password_reset_attempts"));
