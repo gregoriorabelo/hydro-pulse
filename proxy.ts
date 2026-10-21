@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { verifySessionToken } from "@/lib/auth";
 
-const PUBLIC_PATHS = new Set(["/login", "/esqueci-senha", "/reset-senha"]);
+const PUBLIC_PATHS = new Set(["/login", "/esqueci-senha", "/reset-senha", "/convite"]);
 
 export async function proxy(request: NextRequest) {
   const token = request.cookies.get("hydro_pulse_session")?.value;

@@ -14,6 +14,13 @@ type TeamMember = {
   role: CondominiumRole;
 };
 
+type PendingInvite = {
+  id: string;
+  email: string;
+  role: CondominiumRole;
+  expiresAt: string;
+};
+
 const INVITABLE_ROLES: CondominiumRole[] = ["sindico", "operador", "visualizador"];
 const INVITABLE_ROLE_LABELS: Record<CondominiumRole, string> = CONDOMINIUM_ROLE_LABELS;
 
@@ -21,7 +28,9 @@ export default function EquipePage() {
   const { activeCondominiumId, condominiums, loading: loadingCondominiums } =
     useCondominiumContext();
   const [team, setTeam] = useState<TeamMember[]>([]);
+  const [pendingInvites, setPendingInvites] = useState<PendingInvite[]>([]);
   const [invitedCount, setInvitedCount] = useState(0);
+  const [pendingCount, setPendingCount] = useState(0);
   const [maxInvited, setMaxInvited] = useState(2);
   const [canManage, setCanManage] = useState(false);
   const [loadingTeam, setLoadingTeam] = useState(true);
@@ -30,6 +39,7 @@ export default function EquipePage() {
   const [role, setRole] = useState<CondominiumRole>("operador");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [inviteSent, setInviteSent] = useState(false);
 
   function loadData() {
     if (!activeCondominiumId) return;
@@ -38,7 +48,9 @@ export default function EquipePage() {
       .then((r) => r.json())
       .then((data) => {
         setTeam(data.team ?? []);
+        setPendingInvites(data.pendingInvites ?? []);
         setInvitedCount(data.invitedCount ?? 0);
+        setPendingCount(data.pendingCount ?? 0);
         setMaxInvited(data.maxInvited ?? 2);
         setCanManage(Boolean(data.canManage));
         setLoadingTeam(false);
@@ -51,6 +63,7 @@ export default function EquipePage() {
 
   function openInvite() {
     setError(null);
+    setInviteSent(false);
     setEmail("");
     setRole("operador");
     setModalOpen(true);
@@ -71,11 +84,11 @@ export default function EquipePage() {
 
     if (!response.ok) {
       const data = await response.json().catch(() => null);
-      setError(data?.error ?? "Não foi possível convidar esse usuário.");
+      setError(data?.error ?? "Não foi possível enviar o convite.");
       return;
     }
 
-    setModalOpen(false);
+    setInviteSent(true);
     loadData();
   }
 
@@ -100,6 +113,25 @@ export default function EquipePage() {
     loadData();
   }
 
+  async function handleCancelInvite(invite: PendingInvite) {
+    const confirmed = window.confirm(`Cancelar o convite pendente para "${invite.email}"?`);
+
+    if (!confirmed) return;
+
+    const response = await fetch(
+      `/api/team?condominiumId=${activeCondominiumId}&inviteId=${invite.id}`,
+      { method: "DELETE" }
+    );
+
+    if (!response.ok) {
+      const data = await response.json().catch(() => null);
+      window.alert(data?.error ?? "Não foi possível cancelar o convite.");
+      return;
+    }
+
+    loadData();
+  }
+
   if (!loadingCondominiums && condominiums.length === 0) {
     return (
       <main>
@@ -109,7 +141,7 @@ export default function EquipePage() {
     );
   }
 
-  const slotsLeft = Math.max(0, maxInvited - invitedCount);
+  const slotsLeft = Math.max(0, maxInvited - invitedCount - pendingCount);
 
   return (
     <>
@@ -138,7 +170,7 @@ export default function EquipePage() {
         {canManage && (
           <p className="text-sm text-slate-400">
             {slotsLeft} de {maxInvited} vaga(s) adicional(is) disponível(is) neste
-            condomínio.
+            condomínio{pendingCount > 0 && ` (${pendingCount} convite(s) pendente(s) já contam no limite)`}.
           </p>
         )}
 
@@ -183,6 +215,31 @@ export default function EquipePage() {
                     )}
                   </tr>
                 ))}
+
+                {pendingInvites.map((invite) => (
+                  <tr key={invite.id} className="border-b border-white/5 last:border-0">
+                    <td className="px-6 py-4 text-slate-500">—</td>
+                    <td className="px-6 py-4 text-slate-300">{invite.email}</td>
+                    <td className="px-6 py-4">
+                      <span className="rounded-full border border-yellow-500/20 bg-yellow-500/10 px-3 py-1 text-xs font-semibold text-yellow-300">
+                        Convite pendente — {CONDOMINIUM_ROLE_LABELS[invite.role]}
+                      </span>
+                    </td>
+                    {canManage && (
+                      <td className="px-6 py-4 text-right">
+                        <ActionsMenu
+                          actions={[
+                            {
+                              label: "Cancelar convite",
+                              onClick: () => handleCancelInvite(invite),
+                              danger: true,
+                            },
+                          ]}
+                        />
+                      </td>
+                    )}
+                  </tr>
+                ))}
               </tbody>
             </table>
           )}
@@ -191,47 +248,54 @@ export default function EquipePage() {
 
       {modalOpen && (
         <Modal title="Convidar pessoa" onClose={() => setModalOpen(false)}>
-          <form className="space-y-4" onSubmit={handleSubmit}>
-            <Field
-              label="E-mail"
-              type="email"
-              required
-              value={email}
-              onChange={setEmail}
-            />
-
-            <SelectField
-              label="Papel neste condomínio"
-              value={INVITABLE_ROLE_LABELS[role]}
-              options={INVITABLE_ROLES.map((r) => INVITABLE_ROLE_LABELS[r])}
-              onChange={(label) => {
-                const found = INVITABLE_ROLES.find(
-                  (r) => INVITABLE_ROLE_LABELS[r] === label
-                );
-                setRole(found ?? "operador");
-              }}
-            />
-
-            <p className="text-xs text-slate-500">
-              Se o e-mail já tiver uma conta no HydroPulse, só liberamos o
-              acesso a este condomínio. Se for novo, enviamos um link para a
-              pessoa definir a própria senha.
+          {inviteSent ? (
+            <p className="rounded-2xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-300">
+              Convite enviado para {email}. A pessoa só ganha acesso depois de
+              clicar no link do e-mail e aceitar.
             </p>
+          ) : (
+            <form className="space-y-4" onSubmit={handleSubmit}>
+              <Field
+                label="E-mail"
+                type="email"
+                required
+                value={email}
+                onChange={setEmail}
+              />
 
-            {error && (
-              <p className="rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-300">
-                {error}
+              <SelectField
+                label="Papel neste condomínio"
+                value={INVITABLE_ROLE_LABELS[role]}
+                options={INVITABLE_ROLES.map((r) => INVITABLE_ROLE_LABELS[r])}
+                onChange={(label) => {
+                  const found = INVITABLE_ROLES.find(
+                    (r) => INVITABLE_ROLE_LABELS[r] === label
+                  );
+                  setRole(found ?? "operador");
+                }}
+              />
+
+              <p className="text-xs text-slate-500">
+                A pessoa recebe um e-mail com um link de convite e só ganha
+                acesso depois de aceitar — ela nunca é adicionada
+                automaticamente.
               </p>
-            )}
 
-            <button
-              type="submit"
-              disabled={saving}
-              className="w-full rounded-2xl bg-brand-gold px-4 py-3 font-semibold text-brand-deep transition hover:bg-[#e0c15c] disabled:opacity-60"
-            >
-              {saving ? "Enviando..." : "Convidar"}
-            </button>
-          </form>
+              {error && (
+                <p className="rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+                  {error}
+                </p>
+              )}
+
+              <button
+                type="submit"
+                disabled={saving}
+                className="w-full rounded-2xl bg-brand-gold px-4 py-3 font-semibold text-brand-deep transition hover:bg-[#e0c15c] disabled:opacity-60"
+              >
+                {saving ? "Enviando..." : "Enviar convite"}
+              </button>
+            </form>
+          )}
         </Modal>
       )}
     </>

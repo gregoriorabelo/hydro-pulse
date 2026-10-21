@@ -102,6 +102,17 @@ create table if not exists condominium_contacts (
   created_at timestamptz not null default now()
 );
 
+create table if not exists team_invites (
+  id uuid primary key default gen_random_uuid(),
+  condominium_id uuid not null references condominiums(id) on delete cascade,
+  email text not null,
+  role text not null check (role in ('sindico', 'operador', 'visualizador')),
+  invited_by uuid references users(id) on delete set null,
+  created_at timestamptz not null default now(),
+  expires_at timestamptz not null,
+  accepted_at timestamptz
+);
+
 create table if not exists readings (
   id uuid primary key default gen_random_uuid(),
   reservoir_id uuid not null references reservoirs(id) on delete cascade,
@@ -120,3 +131,6 @@ create index if not exists readings_reservoir_id_recorded_at_idx
 create index if not exists audit_log_created_at_idx on audit_log (created_at desc);
 create index if not exists condominium_contacts_condominium_id_idx
   on condominium_contacts (condominium_id);
+create index if not exists team_invites_condominium_id_idx
+  on team_invites (condominium_id);
+create index if not exists team_invites_email_idx on team_invites (email);

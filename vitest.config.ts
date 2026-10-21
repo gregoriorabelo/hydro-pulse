@@ -11,6 +11,7 @@ export default defineConfig({
     environment: "node",
     env: {
       DATABASE_URL: "postgresql://user:pass@ep-test.neon.tech/db",
+      AUTH_SECRET: "test-secret-not-for-production-use-0000000000",
     },
   },
 });

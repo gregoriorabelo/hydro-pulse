@@ -5,9 +5,12 @@ import { getCondominiumRole } from "@/lib/access";
 import { logAudit } from "@/lib/audit";
 import {
   MAX_INVITED_TEAM_MEMBERS,
+  cancelInvite,
   countInvitedMembers,
-  inviteTeamMember,
+  countPendingInvites,
+  createTeamInvite,
   isInvitableRole,
+  listPendingInvites,
   listTeam,
   removeTeamMember,
 } from "@/services/teamService";
@@ -35,16 +38,22 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Sem acesso a este condomínio" }, { status: 403 });
   }
 
-  const [team, invitedCount] = await Promise.all([
+  const manage = canManageTeam(role);
+
+  const [team, invitedCount, pendingCount, pendingInvites] = await Promise.all([
     listTeam(condominiumId),
     countInvitedMembers(condominiumId),
+    countPendingInvites(condominiumId),
+    manage ? listPendingInvites(condominiumId) : Promise.resolve([]),
   ]);
 
   return NextResponse.json({
     team,
     invitedCount,
+    pendingCount,
     maxInvited: MAX_INVITED_TEAM_MEMBERS,
-    canManage: canManageTeam(role),
+    canManage: manage,
+    pendingInvites,
   });
 }
 
@@ -82,7 +91,13 @@ export async function POST(request: NextRequest) {
   }
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? new URL(request.url).origin;
-  const result = await inviteTeamMember(body.condominiumId, body.email, body.role, appUrl);
+  const result = await createTeamInvite(
+    body.condominiumId,
+    body.email,
+    body.role,
+    session.userId,
+    appUrl
+  );
 
   if (!result.ok) {
     return NextResponse.json({ error: result.error }, { status: 400 });
@@ -92,11 +107,11 @@ export async function POST(request: NextRequest) {
     session,
     action: "create",
     entityType: "user",
-    entityId: result.member.userId,
-    details: { email: result.member.email, role: result.member.role, condominiumId: body.condominiumId },
+    entityId: result.inviteId,
+    details: { email: body.email, role: body.role, condominiumId: body.condominiumId, invite: true },
   });
 
-  return NextResponse.json({ member: result.member }, { status: 201 });
+  return NextResponse.json({ success: true }, { status: 201 });
 }
 
 export async function DELETE(request: NextRequest) {
@@ -108,10 +123,11 @@ export async function DELETE(request: NextRequest) {
 
   const condominiumId = request.nextUrl.searchParams.get("condominiumId");
   const userId = request.nextUrl.searchParams.get("userId");
+  const inviteId = request.nextUrl.searchParams.get("inviteId");
 
-  if (!condominiumId || !userId) {
+  if (!condominiumId || (!userId && !inviteId)) {
     return NextResponse.json(
-      { error: "condominiumId e userId são obrigatórios" },
+      { error: "condominiumId e (userId ou inviteId) são obrigatórios" },
       { status: 400 }
     );
   }
@@ -125,7 +141,21 @@ export async function DELETE(request: NextRequest) {
     );
   }
 
-  const result = await removeTeamMember(condominiumId, userId);
+  if (inviteId) {
+    await cancelInvite(condominiumId, inviteId);
+
+    await logAudit({
+      session,
+      action: "delete",
+      entityType: "user",
+      entityId: inviteId,
+      details: { condominiumId, invite: true },
+    });
+
+    return NextResponse.json({ success: true });
+  }
+
+  const result = await removeTeamMember(condominiumId, userId!);
 
   if (!result.ok) {
     return NextResponse.json({ error: result.error }, { status: 400 });
@@ -135,7 +165,7 @@ export async function DELETE(request: NextRequest) {
     session,
     action: "delete",
     entityType: "user",
-    entityId: userId,
+    entityId: userId!,
     details: { condominiumId },
   });
 
