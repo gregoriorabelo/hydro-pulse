@@ -45,6 +45,13 @@ describe("inviteTeamMember", () => {
     expect(sqlMock).not.toHaveBeenCalled();
   });
 
+  it("rejects an invalid email", async () => {
+    const result = await inviteTeamMember("condo-1", "não-é-email", "operador", "https://hydro-pulse.example");
+
+    expect(result.ok).toBe(false);
+    expect(sqlMock).not.toHaveBeenCalled();
+  });
+
   it("rejects once the condominium already has the max invited members", async () => {
     sqlMock.mockResolvedValueOnce([{ count: MAX_INVITED_TEAM_MEMBERS }]);
 
@@ -72,7 +79,7 @@ describe("inviteTeamMember", () => {
     sqlMock.mockResolvedValueOnce([{ name: "Long Beach" }]);
     sqlMock.mockResolvedValueOnce([{ id: "u1", name: "Maria", email: "maria@teste.com" }]);
     sqlMock.mockResolvedValueOnce([]); // not yet linked
-    sqlMock.mockResolvedValueOnce([]); // insert into user_condominiums
+    sqlMock.mockResolvedValueOnce([{ id: "link-1" }]); // insert into user_condominiums
 
     const result = await inviteTeamMember("condo-1", "maria@teste.com", "visualizador", "https://hydro-pulse.example");
 
@@ -86,13 +93,29 @@ describe("inviteTeamMember", () => {
     sqlMock.mockResolvedValueOnce([{ name: "Long Beach" }]);
     sqlMock.mockResolvedValueOnce([]); // no existing user
     sqlMock.mockResolvedValueOnce([{ id: "new-user" }]); // insert into users
-    sqlMock.mockResolvedValueOnce([]); // insert into user_condominiums
+    sqlMock.mockResolvedValueOnce([{ id: "link-2" }]); // insert into user_condominiums
 
     const result = await inviteTeamMember("condo-1", "novo@teste.com", "sindico", "https://hydro-pulse.example");
 
     expect(result.ok).toBe(true);
     expect(createResetTokenMock).toHaveBeenCalledWith("new-user", 7 * 24 * 60 * 60);
     expect(sendEmailMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("rejects when the limit was reached between the pre-check and the insert (race condition)", async () => {
+    sqlMock.mockResolvedValueOnce([{ count: 0 }]); // countInvitedMembers pre-check passes
+    sqlMock.mockResolvedValueOnce([{ name: "Long Beach" }]);
+    sqlMock.mockResolvedValueOnce([]); // no existing user
+    sqlMock.mockResolvedValueOnce([{ id: "new-user" }]); // insert into users
+    sqlMock.mockResolvedValueOnce([]); // atomic insert finds the limit already reached, inserts nothing
+
+    const result = await inviteTeamMember("condo-1", "novo@teste.com", "operador", "https://hydro-pulse.example");
+
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.error).toContain("limite");
+    }
+    expect(sendEmailMock).not.toHaveBeenCalled();
   });
 });
 

@@ -68,6 +68,10 @@ export async function inviteTeamMember(
     return { ok: false, error: "Papel inválido para convite." };
   }
 
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return { ok: false, error: "E-mail inválido." };
+  }
+
   const currentCount = await countInvitedMembers(condominiumId);
 
   if (currentCount >= MAX_INVITED_TEAM_MEMBERS) {
@@ -118,10 +122,22 @@ export async function inviteTeamMember(
     userId = rows[0].id;
   }
 
-  await sql`
+  const insertedRows = (await sql`
     insert into user_condominiums (user_id, condominium_id, role)
-    values (${userId}, ${condominiumId}, ${role})
-  `;
+    select ${userId}, ${condominiumId}, ${role}
+    where (
+      select count(*) from user_condominiums
+      where condominium_id = ${condominiumId} and role != 'admin'
+    ) < ${MAX_INVITED_TEAM_MEMBERS}
+    returning id
+  `) as { id: string }[];
+
+  if (insertedRows.length === 0) {
+    return {
+      ok: false,
+      error: `Este condomínio já atingiu o limite de ${MAX_INVITED_TEAM_MEMBERS} usuários adicionais.`,
+    };
+  }
 
   if (isNewUser) {
     const token = await createResetToken(userId, INVITE_LINK_DURATION_SECONDS);
